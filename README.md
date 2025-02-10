@@ -2,14 +2,13 @@
 
 Pitch til Bouvet One:
 ***
-Prediksjon av Stortingsvalet 2025
+Kan vi forutse kven som vinn stortingsvalet i 2025 – med data science
 
-Nate Silver blei kåra til ein av verdas 100 mest innflytelsesrike personar etter at hans valprognosemodell fivethirtyeight korrekt predikerte utfallet i 49 av 50 stater i det amerikanske presidentvalget i 2008.
+I 2008 blei Nate Silver verdskjend då hans valprognosemodell korrekt føresåg utfallet i 49 av 50 statar i det amerikanske presidentvalet. Inspirert av hans metode vil vi utforske om vi kan gjere det same for Stortingsvalet 2025.
 
-Kan vi følgje i hans fotspor og predikere utfallet av stortingsvalget i Noreg i 2025?
+Kva data kan vi bruke? Poll-of-polls, regjeringsskifte, politiske skandalar, rentenivå og arbeidsløyse – eller kanskje sperregrensa og utjamningsmandata vil spele ei avgjerande rolle?
 
-Vi vil arrangere en kodekveld senere i vår der vi vil prøve å lage ein slik modell. Dette foredraget vil legge grunnlaget og utforske hvilke data som fins offentlig tilgjengelig, som t.d. poll-of-polls, politiske skandaler, regjeringsskifte, rentenivå og arbeidsledigheitstal - og har modifiserte Sainte-Laguës metode, utjamningsmandat og sperregrense å seie?
-
+Bli med på dette foredraget for å få innsikt i metodar, data og algoritmar. Seinare i vår arrangerer vi ein kodekveld der vi saman prøver å bygge ein valmodell for Noreg!
 
 ****
 Det finst eit git-repo med python-kode som berekner mandat utifrå metoden som brukast i Noreg
