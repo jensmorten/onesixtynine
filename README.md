@@ -1,8 +1,9 @@
 # onesixtynine
 
-Kodekveld 22.09.2025:
+Kodekveld 22.09.2025: (https://event.bouvet.no/event/e6bcce8f-d697-40c3-a8f8-136ce03cdf84)
 
-Setup on a Windows system
+Setup on a Windows system:
+
 For Windows system users, the easiest way is probably to install a WinPython distribution that already includes Python 3.11 and Jupyter Notebooks.
 
 This version is tested to work with the demo and exercise: https://github.com/winpython/winpython/releases/tag/13.1.202502222final
@@ -17,7 +18,7 @@ Type "jupyter notebook" to start Jupyter Notebooks.
 
 Select the  notebook onesixtyninevBouvet1-13032025 in the browser window that opens.
 
-Run the notebook. It should run without problems and produce graphs in the bouvet one presentation. 
+Run the notebook. (Select Run - Run all cells).  It should run without problems and produce graphs in the bouvet one presentation. 
 
 Note: If you prefer Jupyter Lab over Jupyter Notebook, you can install it by typing pip install jupyterlab in your command terminal and then following similar steps to launch it as done with Jupyter Notebook.
 
