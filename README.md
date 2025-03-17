@@ -11,6 +11,27 @@ Kan vi følgje i hans fotspor og predikere utfallet av stortingsvalget i Noreg i
 Vi vil arrangere ein kodekveld senere i vår der vi vil prøve å lage ein slik modell. Dette foredraget vil legge grunnlaget og utforske hvilke data som finst offentleg tilgjengeleg, som t.d. poll-of-polls, politiske skandaler, regjeringsskifte, rentenivå og arbeidsledigheitstal - og har modifiserte Sainte-Laguës metode, utjamningsmandat og sperregrense å seie for utfallet?
 
 
+****
+
+Setup on a Windows system
+For Windows system users, the easiest way is probably to install a WinPython distribution that already includes Python 3.11 and Jupyter Notebooks.
+
+This version is tested to work with the demo and exercise: https://github.com/winpython/winpython/releases/tag/13.1.202502222final
+
+Download WinPython and extract the files to a folder of your choice.
+
+Open the extracted folder and run WinPython Command Prompt.exe.
+
+Navigate to your GitHub folder with the exercise by typing cd C:\[....]\GitHub\OneSixtyNine.
+
+Type "jupyter notebook" to start Jupyter Notebooks. 
+
+Select the  notebook onesixtyninevBouvet1-13032025 in the browser window that opens.
+
+Run the notebook. It should run without problems and produce graphs in the bouvet one presentation. 
+
+Note: If you prefer Jupyter Lab over Jupyter Notebook, you can install it by typing pip install jupyterlab in your command terminal and then following similar steps to launch it as done with Jupyter Notebook.
+
 
 ****
 Det finst eit git-repo med python-kode som berekner mandat utifrå metoden som brukast i Noreg
