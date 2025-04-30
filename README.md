@@ -1,6 +1,6 @@
 # onesixtynine
 
-Kodekveld 22.09.2025: (https://event.bouvet.no/event/e6bcce8f-d697-40c3-a8f8-136ce03cdf84)
+Kodekveld 15.05.2025: (https://event.bouvet.no/event/e6bcce8f-d697-40c3-a8f8-136ce03cdf84)
 
 Setup on a Windows system:
 
