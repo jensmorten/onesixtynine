@@ -2,7 +2,7 @@
 
 Kodekveld 15.05.2025: (https://event.bouvet.no/event/e6bcce8f-d697-40c3-a8f8-136ce03cdf84)
 
-Setup on a Windows system:
+## Setup on a Windows system:
 
 For Windows system users, the easiest way is probably to install a WinPython distribution that already includes Python 3.11 and Jupyter Notebooks.
 
@@ -14,7 +14,22 @@ Open the extracted folder and run WinPython Command Prompt.exe.
 
 Navigate to your GitHub folder with the exercise by typing cd C:\[....]\GitHub\OneSixtyNine.
 
-Type "jupyter notebook" to start Jupyter Notebooks. 
+## Setup on a Linux/WSL:
+
+Python comes preinstalled on most Linux distributions, and is available as a package on all others.
+
+However, should you need to install it check out this link: https://diveintopython.org/learn/install/linux
+
+With python installed, run these commands from the root of the project:
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+## Shared steps:
+
+Type `jupyter notebook` to start Jupyter Notebooks. 
 
 Select the  notebook onesixtyninevBouvet1-13032025 in the browser window that opens.
 
