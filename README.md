@@ -14,11 +14,13 @@ Open the extracted folder and run WinPython Command Prompt.exe.
 
 Navigate to your GitHub folder with the exercise by typing cd C:\[....]\GitHub\OneSixtyNine.
 
-## Setup on a Linux/WSL:
+## Setup on Linux/WSL and macOS:
 
 Python comes preinstalled on most Linux distributions, and is available as a package on all others.
 
 However, should you need to install it check out this link: https://diveintopython.org/learn/install/linux
+
+To install python on macOS follow this link: https://diveintopython.org/learn/install/mac
 
 With python installed, run these commands from the root of the project:
 ```
