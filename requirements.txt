@@ -1,4 +1,6 @@
 notebook
+numpy==1.26.4 # compatible with pmdarima
+pmdarima
 pandas
 scikit-learn
 seaborn
