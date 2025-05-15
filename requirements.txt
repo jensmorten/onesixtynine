@@ -1,5 +1,9 @@
+neuralprophet
 notebook
+numpy==1.26.4 # compatible with pmdarima
+pmdarima
 pandas
+prophet
 scikit-learn
 seaborn
 statsmodels
