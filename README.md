@@ -1,10 +1,6 @@
 ## Summary
 
-Kan vi forutsjå kven som vinn stortingsvalet i 2025 – med data science?
-
-I 2008 blei Nate Silver verdskjend då hans valprognosemodell korrekt føresåg utfallet i 49 av 50 statar i det amerikanske presidentvalet. Inspirert av hans metode vil vi utforske om vi kan gjere det same for Stortingsvalet 2025.
-
-Kan vi følgje i hans fotspor og predikere utfallet av stortingsvalget i Noreg i 2025?
+Prediksjon av norsk stortingsval basert på pollofpolls-data. 
 
 
 ## Setup on a Windows system:
