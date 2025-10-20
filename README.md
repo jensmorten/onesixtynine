@@ -2,6 +2,8 @@
 
 Prediksjon av norsk stortingsval basert på pollofpolls-data. 
 
+<img width="1185" height="616" alt="image" src="https://github.com/user-attachments/assets/579ff2f7-820b-46f0-a655-78b0c69e0958" />
+
 
 ## Setup on a Windows system:
 
