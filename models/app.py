@@ -15,9 +15,9 @@ df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # month-end
 
 # Sidebar inputs
-lags = st.sidebar.number_input("Number of lags to train (max 12)", min_value=1, max_value=12, value=6, step=1)
-n_months = st.sidebar.number_input("Months to forecast", min_value=1, max_value=24, value=6, step=1)
-months_back = st.sidebar.number_input("Months of history to show", min_value=1, max_value=36, value=12, step=1)
+lags = st.sidebar.number_input("måneder bakover å bruke til trening (maks 12)", min_value=1, max_value=12, value=6, step=1)
+n_months = st.sidebar.number_input("Måneder framover å predikere", min_value=1, max_value=24, value=6, step=1)
+months_back = st.sidebar.number_input("Måneder bakover å vise i plottet", min_value=1, max_value=36, value=12, step=1)
 
 # --- Fit VAR model ---
 model = VAR(df)
@@ -38,7 +38,7 @@ colors = {
     'MDG': '#008000', 'Rodt': '#8B0000', 'Andre': '#808080'
 }
 
-fig=plt.figure(figsize=(14,7))
+fig, ax = plt.subplots(figsize=(14, 7))
 df_recent = df.iloc[-months_back:]
 
 for party, color in colors.items():
@@ -55,13 +55,13 @@ for party, color in colors.items():
 
 plt.xlim(df_recent.index[0], forecast_df.index[-1])
 plt.ylim(0, 40)
-plt.xlabel("Month")
-plt.ylabel("Polling (%)")
-plt.title(f"Polling Forecast ({months_back} months history + {n_months} months forecast)")
+plt.xlabel("Måned")
+plt.ylabel("Oppslutning (%)")
+plt.title(f"Prediksjon av meningsmåling med bruka av ({lags} måneders historie,  + {n_months} måneder framover i tid)")
 plt.legend(loc="upper left", ncol=2)
 plt.grid(alpha=0.2)
 plt.tight_layout()
 
 # Show plot in Streamlit
 plt.tight_layout()
-st.pyplot(fig, use_container_width=True)
+st.pyplot(fig, use_container_width=False)
