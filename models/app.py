@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from statsmodels.tsa.api import VAR
 
-st.set_page_config(page_title="Polling Forecast", layout="wide")
-st.title("OneSixtyNine Poll Forecast")
+st.set_page_config(page_title="Partiers oppslutning (stortingsvalg, Norge)", layout="wide")
+st.title("OneSixtyNine prediksjon av partiers oppslutning")
 
 # --- Load data ---
 url = "https://raw.githubusercontent.com/jensmorten/onesixtynine/main/data/pollofpolls_master.csv"
@@ -38,7 +38,7 @@ colors = {
     'MDG': '#008000', 'Rodt': '#8B0000', 'Andre': '#808080'
 }
 
-plt.figure(figsize=(14,7))
+fig=plt.figure(figsize=(14,7))
 df_recent = df.iloc[-months_back:]
 
 for party, color in colors.items():
@@ -63,4 +63,5 @@ plt.grid(alpha=0.2)
 plt.tight_layout()
 
 # Show plot in Streamlit
-st.pyplot(plt)
+plt.tight_layout()
+st.pyplot(fig, use_container_width=True)
