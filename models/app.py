@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from statsmodels.tsa.api import VAR
 
-st.set_page_config(page_title="Partiers oppslutning (stortingsvalg, Norge)", layout="wide")
-st.title("OneSixtyNine prediksjon av partiers oppslutning")
+st.set_page_config(page_title="OneSixtyNine: Prediksjon av norske politiske partiers oppslutning (stortingsvalg)", layout="wide")
+st.title("OneSixtyNine: Prediksjon av norske politiske partiers oppslutning (stortingsvalg)")
 
 # --- Load data ---
 url = "https://raw.githubusercontent.com/jensmorten/onesixtynine/main/data/pollofpolls_master.csv"
@@ -15,9 +15,13 @@ df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # month-end
 
 # Sidebar inputs
-lags = st.sidebar.number_input("måneder bakover å bruke til trening (maks 12)", min_value=1, max_value=12, value=6, step=1)
+st.sidebar.markdown("""
+Sett parametere:<br>
+""", unsafe_allow_html=True)
+
+lags = st.sidebar.number_input("Antall måneder å bruke til tilpassing (trening) av modellen (maks 12)", min_value=1, max_value=12, value=6, step=1)
 n_months = st.sidebar.number_input("Måneder framover å predikere", min_value=1, max_value=24, value=6, step=1)
-months_back = st.sidebar.number_input("Måneder bakover å vise i plottet", min_value=1, max_value=36, value=12, step=1)
+months_back = st.sidebar.number_input("Måneder bakover i tid å vise i plottet", min_value=1, max_value=36, value=12, step=1)
 
 # --- Fit VAR model ---
 model = VAR(df)
@@ -57,7 +61,7 @@ plt.xlim(df_recent.index[0], forecast_df.index[-1])
 plt.ylim(0, 40)
 plt.xlabel("Måned")
 plt.ylabel("Oppslutning (%)")
-plt.title(f"Prediksjon av meningsmåling med bruka av ({lags} måneders historie,  + {n_months} måneder framover i tid)")
+plt.title(f"Prediksjon av meningsmåling med bruk av {lags} måneders historie, viser {n_months} måneder framover i tid. Data er sist oppdatert {df.index[-1].date()}")
 plt.legend(loc="upper left", ncol=2)
 plt.grid(alpha=0.2)
 plt.tight_layout()
@@ -65,3 +69,11 @@ plt.tight_layout()
 # Show plot in Streamlit
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
+
+st.sidebar.markdown("""
+Onesixtynine er en prediksjon basert på historiske meningsmålinger fra www.pollofpolls.no <br> 
+men har ingen assosiasjon til denne siden.<br>  
+Appen bruker vektor-autoregresjon (<a href="https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.var_model.VAR.html">VAR </a> ) for å samtidig estimer 10 korrelerte tidsserier. Du kan selv justere input-parametere for å se effekten av dette. <br><br> 
+<br> kontakt jens.morten.nilsen@gmail.com for spørsmål eller kommentarer. 
+""", unsafe_allow_html=True)
+
