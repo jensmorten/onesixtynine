@@ -1,12 +1,5 @@
-# Core libraries
 numpy>=1.24
 pandas>=2.1
 matplotlib>=3.8
 statsmodels>=0.14
 streamlit>=1.26
-
-# Time series forecasting
-pmdarima==2.0.4
-
-# Optional utilities
-requests>=2.32
