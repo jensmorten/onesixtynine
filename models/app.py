@@ -72,7 +72,7 @@ st.pyplot(fig, use_container_width=False)
 
 st.sidebar.markdown("""
 Prediksjonsmodellen <b>OneSixtyNine</b>* baserer seg på historiske meningsmålinger hentet fra www.pollofpolls.no 
-men har ingen assosiasjon til denne siden.<br>  
+men har ingen tilknytning til denne siden utover bruk av data denne gjør offentlig tilgjengelig.<br>  
 Modellen bruker vektor-autoregresjon (<a href="https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.var_model.VAR.html">VAR </a> ) for å samtidig tilpasse 10 korrelerte tidsserier. Du kan selv justere input-parametere for å se effekten av dette. <br> <br>
 Kontakt gjerne jens.morten.nilsen@gmail.com for spørsmål eller kommentarer. <br><br>
 *navnet er en homage til Nate Silvers <a href="https://en.wikipedia.org/wiki/FiveThirtyEight">FiveThirtyEight</a> 
