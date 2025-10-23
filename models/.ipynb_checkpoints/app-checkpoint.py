@@ -1,0 +1,66 @@
+# save this as app.py
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.api import VAR
+
+st.set_page_config(page_title="Polling Forecast", layout="wide")
+st.title("OneSixtyNine Poll Forecast")
+
+# --- Load data ---
+url = "https://raw.githubusercontent.com/jensmorten/onesixtynine/main/data/pollofpolls_master.csv"
+df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
+df = df.sort_index()
+df.index = df.index.to_period('M').to_timestamp('M')  # month-end
+
+# Sidebar inputs
+lags = st.sidebar.number_input("Number of lags to train (max 12)", min_value=1, max_value=12, value=6, step=1)
+n_months = st.sidebar.number_input("Months to forecast", min_value=1, max_value=24, value=6, step=1)
+months_back = st.sidebar.number_input("Months of history to show", min_value=1, max_value=36, value=12, step=1)
+
+# --- Fit VAR model ---
+model = VAR(df)
+model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
+
+# --- Forecast ---
+forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(model_fitted.endog, steps=n_months)
+forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='M')[1:]
+
+forecast_df = pd.DataFrame(forecast, index=forecast_index, columns=df.columns)
+forecast_lower_df = pd.DataFrame(forecast_lower, index=forecast_index, columns=df.columns)
+forecast_upper_df = pd.DataFrame(forecast_upper, index=forecast_index, columns=df.columns)
+
+# --- Plot ---
+colors = {
+    'Ap': '#FF0000', 'Hoyre': '#0000FF', 'Frp': '#00008B', 'SV': '#FF6347',
+    'SP': '#006400', 'KrF': '#FFD700', 'Venstre': '#ADD8E6',
+    'MDG': '#008000', 'Rodt': '#8B0000', 'Andre': '#808080'
+}
+
+plt.figure(figsize=(14,7))
+df_recent = df.iloc[-months_back:]
+
+for party, color in colors.items():
+    # Historical
+    plt.plot(df_recent.index, df_recent[party], marker="o", color=color, label=f"{party}")
+    # Forecast
+    plt.plot(forecast_df.index, forecast_df[party], linestyle="dashed", color=color)
+    # Connect last actual to first forecast
+    plt.plot([df_recent.index[-1], forecast_df.index[0]],
+             [df_recent[party].iloc[-1], forecast_df[party].iloc[0]],
+             color=color, linestyle="dashed")
+    # Confidence interval
+    plt.fill_between(forecast_df.index, forecast_lower_df[party], forecast_upper_df[party], color=color, alpha=0.15)
+
+plt.xlim(df_recent.index[0], forecast_df.index[-1])
+plt.ylim(0, 40)
+plt.xlabel("Month")
+plt.ylabel("Polling (%)")
+plt.title(f"Polling Forecast ({months_back} months history + {n_months} months forecast)")
+plt.legend(loc="upper left", ncol=2)
+plt.grid(alpha=0.2)
+plt.tight_layout()
+
+# Show plot in Streamlit
+st.pyplot(plt)
