@@ -122,7 +122,6 @@ for party, prosent in valg_resultat.items():
 
 ax.set_xlim(df_recent_eom.index[0], forecast_df_eom.index[-1])
 ax.set_ylim(0, 40)
-ax.set_xlabel("Måned", fontsize=12)
 ax.set_ylabel("Oppslutning (%)", fontsize=12)
 
 
