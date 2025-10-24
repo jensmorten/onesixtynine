@@ -91,8 +91,8 @@ valg_resultat = {
     'Ap': 28,
     'Hoyre': 14.6,
     'Frp': 23.8,
-    'SV': 5.61,
-    'SP': 5.59,
+    'SV': 5.6,
+    'SP': 5.6,
     'KrF': 4.2,
     'Venstre': 3.7,
     'MDG': 4.7,
@@ -134,8 +134,7 @@ siste_dato = df.index[-1]
 siste_dato_norsk = f"{siste_dato.day}. {norske_mnd[siste_dato.month]} {siste_dato.year}"
 
 ax.set_title(
-    f"Prediksjon basert på {lags} måneders historikk\n"
-    f"Viser {n_months} måneder framover fra {siste_dato_norsk}",
+    f"Prediksjon basert på {lags} måneders historikk, {n_months} måneder framover fra {siste_dato_norsk}",
     fontsize=12, pad=20
 )
 
@@ -164,7 +163,7 @@ ax.tick_params(
     labelsize=12
 )
 
-ax.text(pd.Timestamp("2025-09-08"), 30, "x Valgresultat 2025",
+ax.text(pd.Timestamp("2025-09-08"), 30, "x Valgresultat 2025:",
         fontsize=10, ha="center", va="bottom",
         bbox=dict(facecolor="white"))
 
