@@ -26,7 +26,7 @@ df.index = df.index.to_period('M').to_timestamp('M')  # month-end
 st.sidebar.markdown("### Sett parametere:", unsafe_allow_html=True)
 
 lags = st.sidebar.number_input(
-    "Antall måneder å bruke til tilpassing (trening) av modellen (maks 12)",
+    "Antall måneder å bruke til tilpassing (trening) av modellen (maks 12):",
     min_value=1, max_value=12, value=6, step=1
 )
 n_months = st.sidebar.number_input(
@@ -34,9 +34,16 @@ n_months = st.sidebar.number_input(
     min_value=1, max_value=24, value=6, step=1
 )
 months_back = st.sidebar.number_input(
-    "Måneder bakover i tid å vise i plottet",
-    min_value=1, max_value=36, value=12, step=1
+    "Måneder bakover i tid å vise i plottet:",
+    min_value=6, max_value=36, value=12, step=1
 )
+months_back_start = st.sidebar.number_input(
+    "Måneder bakover å starte prediksjon: ",
+    min_value=0, max_value=5, value=0, step=1
+)
+
+if months_back_start>0:
+	df=df[:-months_back_start]
 
 # --- Fit VAR model ---
 model = VAR(df)
@@ -78,6 +85,20 @@ forecast_lower_df_eom.index = forecast_lower_df_eom.index + MonthEnd(0)
 forecast_upper_df_eom = forecast_upper_df.copy()
 forecast_upper_df_eom.index = forecast_upper_df_eom.index + MonthEnd(0)
 
+valg_dato = pd.Timestamp("2025-09-08")
+valg_resultat = {
+    'Ap': 28,
+    'Hoyre': 14.6,
+    'Frp': 23.8,
+    'SV': 5.61,
+    'SP': 5.59,
+    'KrF': 4.2,
+    'Venstre': 3.7,
+    'MDG': 4.7,
+    'Rodt': 5.3,
+    'Andre': 4.5
+}
+
 # --- Plot setup ---
 sns.set_theme(style="white", context="talk")
 fig, ax = plt.subplots(figsize=(14, 7))
@@ -86,7 +107,7 @@ for party, color in colors.items():
     ax.plot(df_recent_eom.index, df_recent_eom[party],
             color=color, linewidth=2, label=party)
     ax.plot(forecast_df_eom.index, forecast_df_eom[party],
-            color=color, linestyle="--", linewidth=2)
+            color=color, linestyle="--", linewidth=1.5)
     ax.plot([df_recent_eom.index[-1], forecast_df_eom.index[0]],
             [df_recent_eom[party].iloc[-1], forecast_df_eom[party].iloc[0]],
             color=color, linestyle="--", linewidth=1.5)
@@ -94,6 +115,9 @@ for party, color in colors.items():
                     forecast_lower_df_eom[party],
                     forecast_upper_df_eom[party],
                     color=color, alpha=0.08)
+
+for party, prosent in valg_resultat.items():
+    ax.scatter(valg_dato, prosent, marker="x", color=colors[party], s=15, zorder=5)
 
 ax.set_xlim(df_recent_eom.index[0], forecast_df_eom.index[-1])
 ax.set_ylim(0, 40)
@@ -135,6 +159,10 @@ ax.tick_params(
     color="black",
     labelsize=12
 )
+
+ax.text(pd.Timestamp("2025-09-08"), 30, "x Valgresultat 2025",
+        fontsize=10, ha="center", va="bottom",
+        bbox=dict(facecolor="white"))
 
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
