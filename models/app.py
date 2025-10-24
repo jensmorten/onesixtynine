@@ -133,9 +133,9 @@ siste_dato = df.index[-1]
 siste_dato_norsk = f"{siste_dato.day}. {norske_mnd[siste_dato.month]} {siste_dato.year}"
 
 ax.set_title(
-    f"Prediksjon av meningsmåling basert på {lags} måneders historikk\n"
+    f"Prediksjon basert på {lags} måneders historikk\n"
     f"Viser {n_months} måneder framover fra {siste_dato_norsk}",
-    fontsize=15, fontweight="bold", pad=20
+    fontsize=12, pad=20
 )
 
 ax.legend(title="Partier", loc="upper left", ncol=2,facecolor="white",edgecolor="lightgray",
