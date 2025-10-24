@@ -39,7 +39,7 @@ months_back = st.sidebar.number_input(
 )
 months_back_start = st.sidebar.number_input(
     "Måneder bakover å starte prediksjon: ",
-    min_value=0, max_value=5, value=0, step=1
+    min_value=0, max_value=months_back, value=0, step=1
 )
 
 if months_back_start>0:
@@ -129,9 +129,12 @@ ax.set_ylabel("Oppslutning (%)", fontsize=12)
 # 
 ax.xaxis.set_major_formatter(mticker.FuncFormatter(norsk_dato_formatter))
 
+siste_dato = df.index[-1]
+siste_dato_norsk = f"{siste_dato.day}. {norske_mnd[siste_dato.month]} {siste_dato.year}"
+
 ax.set_title(
     f"Prediksjon av meningsmåling basert på {lags} måneders historikk\n"
-    f"Viser {n_months} måneder framover – sist oppdatert {df.index[-1].date()}",
+    f"Viser {n_months} måneder framover fra {siste_dato_norsk}",
     fontsize=15, fontweight="bold", pad=20
 )
 
