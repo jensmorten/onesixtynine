@@ -1,4 +1,3 @@
-# save this as app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -16,13 +15,13 @@ st.set_page_config(
 )
 st.title("OneSixtyNine: Prediksjon av norske politiske partiers oppslutning (stortingsvalg)")
 
-# --- Load data ---
+# --- Last inn data ---
 url = "https://raw.githubusercontent.com/jensmorten/onesixtynine/main/data/pollofpolls_master.csv"
 df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
 df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # month-end
 
-# --- Sidebar inputs ---
+# --- Sidebars ---
 st.sidebar.markdown("### Sett parametere:", unsafe_allow_html=True)
 
 lags = st.sidebar.number_input(
@@ -45,11 +44,11 @@ months_back_start = st.sidebar.number_input(
 if months_back_start>0:
 	df=df[:-months_back_start]
 
-# --- Fit VAR model ---
+# --- Tilpass VAR model ---
 model = VAR(df)
 model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
 
-# --- Forecast ---
+# --- Prediksjon  ---
 forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(model_fitted.endog, steps=n_months)
 forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='M')[1:]
 
@@ -58,6 +57,8 @@ forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100 #normaliser
 forecast_lower_df = pd.DataFrame(forecast_lower, index=forecast_index, columns=df.columns)
 forecast_upper_df = pd.DataFrame(forecast_upper, index=forecast_index, columns=df.columns)
 
+
+# --- Formattering av datoer ---
 norske_mnd = {
     1: "jan", 2: "feb", 3: "mars", 4: "apr", 5: "mai", 6: "juni",
     7: "juli", 8: "aug", 9: "sep", 10: "okt", 11: "nov", 12: "des"
@@ -67,13 +68,15 @@ def norsk_dato_formatter(x, pos=None):
     dato = mdates.num2date(x)
     return f"{dato.day}. {norske_mnd[dato.month]} {dato.year}"
 
-# --- Plot colors ---
+# --- Farger ---
 colors = {
     'Ap': '#FF0000', 'Hoyre': '#0000FF', 'Frp': '#00008B', 'SV': '#FF6347',
     'SP': '#006400', 'KrF': '#FFD700', 'Venstre': '#ADD8E6',
     'MDG': '#008000', 'Rodt': '#8B0000', 'Andre': '#808080'
 }
 
+
+# --- Juster data for plotting ---
 df_recent = df.iloc[-months_back:]
 
 df_recent_eom = df_recent.copy()
@@ -86,6 +89,7 @@ forecast_lower_df_eom.index = forecast_lower_df_eom.index + MonthEnd(0)
 forecast_upper_df_eom = forecast_upper_df.copy()
 forecast_upper_df_eom.index = forecast_upper_df_eom.index + MonthEnd(0)
 
+# --- legg til valgresultat 2025 ---
 valg_dato = pd.Timestamp("2025-09-08")
 valg_resultat = {
     'Ap': 28,
@@ -100,7 +104,7 @@ valg_resultat = {
     'Andre': 4.5
 }
 
-# --- Plot setup ---
+# --- Plotting ---
 sns.set_theme(style="white", context="talk")
 fig, ax = plt.subplots(figsize=(14, 7))
 
@@ -124,9 +128,6 @@ ax.set_xlim(df_recent_eom.index[0], forecast_df_eom.index[-1])
 ax.set_ylim(0, 40)
 ax.set_ylabel("Oppslutning (%)", fontsize=12)
 
-
-
-# 
 ax.xaxis.set_major_formatter(mticker.FuncFormatter(norsk_dato_formatter))
 
 siste_dato = df.index[-1]
