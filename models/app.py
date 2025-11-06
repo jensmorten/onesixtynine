@@ -7,6 +7,8 @@ import seaborn as sns
 from pandas.tseries.offsets import MonthEnd
 from statsmodels.tsa.api import VAR
 import matplotlib.ticker as mticker
+from collections import Counter
+from pandas.tseries.offsets import MonthEnd
 
 # --- Streamlit-oppsett ---
 st.set_page_config(
@@ -105,13 +107,6 @@ def norsk_dato_formatter(x, pos=None):
     dato = mdates.num2date(x)
     return f"{dato.day}. {norske_mnd[dato.month]} {dato.year}"
 
-# --- Fargar ---
-#colors = {
-#    'Ap': '#FF0000', 'Høgre': '#0000FF', 'Frp': '#00008B', 'SV': '#FF6347',
-#    'Sp': '#006400', 'KrF': '#FFD700', 'Venstre': '#ADD8E6',
-#    'MDG': '#008000', 'Raudt': '#8B0000', 'Andre': '#808080'
-#}
-
 colors = {
     'Ap': '#FF6666', 'Høgre': '#6699FF', 'Frp': '#3366CC', 'SV': '#FF9999',
     'Sp': '#339966', 'KrF': '#FFCC66', 'Venstre': '#99CCFF',
@@ -132,6 +127,7 @@ forecast_upper_df_eom = forecast_upper_df.copy()
 forecast_upper_df_eom.index = forecast_upper_df_eom.index + MonthEnd(0)
 
 # --- Valresultat 2025 ---
+pred_datoer= [pd.Timestamp("2025-08-31"), pd.Timestamp("2025-09-30")]
 val_dato = pd.Timestamp("2025-09-08")
 val_resultat = {
     'Ap': 28,
@@ -162,6 +158,7 @@ for parti, farge in colors.items():
                     forecast_lower_df_eom[parti],
                     forecast_upper_df_eom[parti],
                     color=farge, alpha=0.08)
+
 
 for parti, prosent in val_resultat.items():
     ax.text(val_dato, prosent, "*", color=colors[parti], fontsize=20,
@@ -195,12 +192,75 @@ ax.tick_params(
     axis="y", which="major", length=6, width=1.2, color="black", labelsize=12
 )
 
+
 ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
         fontsize=10, ha="center", va="bottom",  color='gray',
         bbox=dict(facecolor="white"))
 
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
+
+
+# Sjekk om vi skal vise validering
+sjekk_dato = pd.Timestamp("2025-08-01")
+
+if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.index for d in pred_datoer):
+    tekst = "### 🎯 Sjekk kor godt OneSixtyNine predikerer valresultatet i 2025!\n\n"
+    tekst += f" Vi set dagens dato til {df.index[-1].strftime('%d. %b %Y')} \n\n"
+    
+    resultat_per_parti = {}
+    total_diff_poll = 0
+    total_diff_modell = 0
+    
+    for parti, val_perc in val_resultat.items():
+        siste_dato_poll = df.index[-1]
+        siste_poll = df[parti].iloc[-1]
+        
+        # Modellen: gjennomsnitt av september og oktober 2025 (month-end)
+        pred_values = []
+        for mnd in [pd.Timestamp("2025-09-30"), pd.Timestamp("2025-10-31")]:
+            if mnd in forecast_df.index:
+                pred_values.append(forecast_df[parti].loc[mnd])
+        modell_pred = np.mean(pred_values) if pred_values else float('nan')
+        
+        # Differansar
+        diff_poll = abs(siste_poll - val_perc)
+        diff_modell = abs(modell_pred - val_perc) ###if not np.isnan(modell_pred) else np.inf
+        
+        # Summer total differanse
+        total_diff_poll += diff_poll
+        total_diff_modell += diff_modell
+
+        # Kven er nærmast
+        nærmast = "✨ OneSixtyNine" if diff_modell <= diff_poll else "📊 Poll of polls"
+        resultat_per_parti[parti] = nærmast
+        
+        tekst += (
+            f"- **{parti}** (valresultat 2025 {val_perc}%): siste poll ({siste_dato_poll.strftime('%d. %b %Y')}) var {siste_poll:.1f}%, "
+            f"OneSixtyNine predikerte {modell_pred:.1f}% | differanse poll-valresultat {diff_poll:.1f}, differanse modell-valresultat {diff_modell:.1f} → {nærmast} var nærmast\n"
+        )
+    
+    # Oppsummering totalt
+    teller = Counter(resultat_per_parti.values())
+    if teller.get("✨ OneSixtyNine",0) > teller.get("📊 Poll of polls",0):
+        konklusjon = f"\n**Totalt:** OneSixtyNine var nærmast for {teller['✨ OneSixtyNine']} parti, Poll of polls for {teller.get('📊 Poll of polls',0)} → **OneSixtyNine er best i antall parti! 🚀**"
+    elif teller.get("📊 Poll of polls",0) > teller.get("✨ OneSixtyNine",0):
+        konklusjon = f"\n**Totalt:** Poll of polls var nærmast for {teller['📊 Poll of polls']}, OneSixtyNine for {teller.get('✨ OneSixtyNine',0)} → **Poll of polls er best i antall parti!**"
+    else:
+        konklusjon = f"\n**Totalt:** OneSixtyNine og Poll of polls var nærmast for like mange parti ⚖️"
+    
+    tekst += konklusjon
+
+    # Total differanse
+    best_total = "OneSixtyNine" if total_diff_modell <= total_diff_poll else "Poll of polls"
+    tekst += (
+        f"\n\n**Total differanse for alle parti:** Poll of polls = {total_diff_poll:.1f}, OneSixtyNine = {total_diff_modell:.1f} → **{best_total}** var best i sum! "
+    )
+
+    tekst += "\n\nIkkje fornøygd? Juster parameterar i kontrollpanel og prøv igjen! ✨"
+    
+    st.markdown(tekst)
+
 
 # --- Fråsegn / info ---
 st.sidebar.markdown("""
