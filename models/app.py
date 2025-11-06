@@ -21,6 +21,14 @@ df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
 df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # månadsslutt
 
+# --- Map kolonnenamn til nynorsk for å unngå KeyError ---
+kolonne_map = {
+    'Hoyre': 'Høgre',
+    'Rodt': 'Raudt',
+    'SP': 'Sp'
+}
+df = df.rename(columns=kolonne_map)
+
 # --- Sidemeny ---
 st.sidebar.markdown("### Set modellparametrar:", unsafe_allow_html=True)
 
@@ -42,7 +50,7 @@ months_back_start = st.sidebar.number_input(
 )
 
 if months_back_start > 0:
-	df = df[:-months_back_start]
+    df = df[:-months_back_start]
 
 # --- Tilpass VAR-modell ---
 model = VAR(df)
@@ -151,7 +159,6 @@ ax.tick_params(
     labelsize=12
 )
 
-# Y-merker kan òg justerast tilsvarande om ønskjeleg
 ax.tick_params(
     axis="y",
     which="major",
