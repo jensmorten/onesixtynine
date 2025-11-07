@@ -190,7 +190,7 @@ for parti, prosent in val_resultat.items():
     ax.text(val_dato, prosent, "*", color=colors[parti], fontsize=20,
             ha="center", va="center", zorder=6)
 
-indikator_tekst = "Utjamna prediksjon er aktivert" if smooth else "Standard prediksjon"
+indikator_tekst = "Utjamna prediksjon" if smooth else "Standard prediksjon"
 if adjust:
     indikator_tekst += " | valjustert"
 
