@@ -37,11 +37,15 @@ st.sidebar.markdown("### ⚙️ Set modellparametrar:", unsafe_allow_html=True)
 
 lags = st.sidebar.number_input(
     "📅 Talet på månader å bruke til tilpassing (trening) av modellen (maks 12):",
-    min_value=1, max_value=12, value=6, step=1
+    min_value=1, max_value=12, value=3, step=1
 )
 
 smooth = st.sidebar.checkbox(
     "🔀Utjamna prediksjon, tilpassing med +/-2 månader", value=True
+)
+
+adjust = st.sidebar.checkbox(
+    "🔧 Juster prediksjon basert på val i 2021", value=False
 )
 
 n_months = st.sidebar.number_input(
@@ -66,7 +70,6 @@ model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
 
 # --- Prediksjon ---
 if smooth:
-    # Liste med gyldige lags
     lags_list = [l for l in range(lags-2, lags+3) if 1 <= l <= 12]
     preds = []
     lowers = []
@@ -81,7 +84,6 @@ if smooth:
         lowers.append(forecast_lower_tmp)
         uppers.append(forecast_upper_tmp)
     
-    # Gjennomsnitt over alle lags
     forecast = np.mean(preds, axis=0)
     forecast_lower = np.mean(lowers, axis=0)
     forecast_upper = np.mean(uppers, axis=0)
@@ -93,9 +95,35 @@ else:
 forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='M')[1:]
 
 forecast_df = pd.DataFrame(forecast, index=forecast_index, columns=df.columns)
-forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100  # normalisering til 100 %
+forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
 forecast_lower_df = pd.DataFrame(forecast_lower, index=forecast_index, columns=df.columns)
 forecast_upper_df = pd.DataFrame(forecast_upper, index=forecast_index, columns=df.columns)
+
+# --- Juster prediksjon for val ---
+if adjust:
+    justeringar = {
+        'Ap': 2.0,
+        'Høgre': -0.2,
+        'Frp': 1.5,
+        'SV': -0.5,
+        'Sp': -0.5,
+        'KrF': 0.4,
+        'Venstre': 1.1,
+        'MDG': -0.8,
+        'Raudt': -0.6,
+        'Andre': -0.2
+    }
+
+    for parti, adj in justeringar.items():
+        if parti in forecast_df.columns:
+            forecast_df[parti] += adj
+            #forecast_lower_df[parti] += adj
+            #forecast_upper_df[parti] += adj
+
+    # Normaliser til 100 % igjen
+    forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
+    #forecast_lower_df = forecast_lower_df.div(forecast_lower_df.sum(axis=1), axis=0) * 100
+    #forecast_upper_df = forecast_upper_df.div(forecast_upper_df.sum(axis=1), axis=0) * 100
 
 # --- Formatering av datoar ---
 norske_mnd = {
@@ -112,7 +140,6 @@ colors = {
     'Sp': '#339966', 'KrF': '#FFCC66', 'Venstre': '#99CCFF',
     'MDG': '#33CC33', 'Raudt': '#CC3333', 'Andre': '#AAAAAA'
 }
-
 
 # --- Juster data for plotting ---
 df_recent = df.iloc[-months_back:]
@@ -159,12 +186,14 @@ for parti, farge in colors.items():
                     forecast_upper_df_eom[parti],
                     color=farge, alpha=0.08)
 
-
 for parti, prosent in val_resultat.items():
     ax.text(val_dato, prosent, "*", color=colors[parti], fontsize=20,
             ha="center", va="center", zorder=6)
 
 indikator_tekst = "Utjamna prediksjon er aktivert" if smooth else "Standard prediksjon"
+if adjust:
+    indikator_tekst += " | valjustert"
+
 ax.text(forecast_df_eom.index[-1], 38, indikator_tekst, fontsize=10, color='gray', ha='right')
 
 ax.set_xlim(df_recent_eom.index[0], forecast_df_eom.index[-1])
@@ -185,13 +214,8 @@ ax.grid(alpha=0.5, linestyle=":")
 for spine in ["top", "right", "bottom", "left"]:
     ax.spines[spine].set_visible(False)
 
-ax.tick_params(
-    axis="x", which="major", length=6, width=1.2, color="black", labelsize=12
-)
-ax.tick_params(
-    axis="y", which="major", length=6, width=1.2, color="black", labelsize=12
-)
-
+ax.tick_params(axis="x", which="major", length=6, width=1.2, color="black", labelsize=12)
+ax.tick_params(axis="y", which="major", length=6, width=1.2, color="black", labelsize=12)
 
 ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
         fontsize=10, ha="center", va="bottom",  color='gray',
@@ -200,8 +224,7 @@ ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
 
-
-# Sjekk om vi skal vise validering
+# --- Validering (same as before) ---
 sjekk_dato = pd.Timestamp("2025-08-01")
 
 if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.index for d in pred_datoer):
@@ -216,22 +239,18 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
         siste_dato_poll = df.index[-1]
         siste_poll = df[parti].iloc[-1]
         
-        # Modellen: gjennomsnitt av september og oktober 2025 (month-end)
         pred_values = []
         for mnd in [pd.Timestamp("2025-09-30"), pd.Timestamp("2025-10-31")]:
             if mnd in forecast_df.index:
                 pred_values.append(forecast_df[parti].loc[mnd])
         modell_pred = np.mean(pred_values) if pred_values else float('nan')
         
-        # Differansar
         diff_poll = abs(siste_poll - val_perc)
-        diff_modell = abs(modell_pred - val_perc) ###if not np.isnan(modell_pred) else np.inf
+        diff_modell = abs(modell_pred - val_perc)
         
-        # Summer total differanse
         total_diff_poll += diff_poll
         total_diff_modell += diff_modell
 
-        # Kven er nærmast
         nærmast = "✨ OneSixtyNine" if diff_modell <= diff_poll else "📊 Poll of polls"
         resultat_per_parti[parti] = nærmast
         
@@ -240,7 +259,6 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
             f"OneSixtyNine predikerte {modell_pred:.1f}% | differanse poll-valresultat {diff_poll:.1f}, differanse modell-valresultat {diff_modell:.1f} → {nærmast} var nærmast\n"
         )
     
-    # Oppsummering totalt
     teller = Counter(resultat_per_parti.values())
     if teller.get("✨ OneSixtyNine",0) > teller.get("📊 Poll of polls",0):
         konklusjon = f"\n**Totalt:** OneSixtyNine var nærmast for {teller['✨ OneSixtyNine']} parti, Poll of polls for {teller.get('📊 Poll of polls',0)} → **OneSixtyNine er best i antall parti! 🚀**"
@@ -251,7 +269,6 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
     
     tekst += konklusjon
 
-    # Total differanse
     best_total = "OneSixtyNine" if total_diff_modell <= total_diff_poll else "Poll of polls"
     tekst += (
         f"\n\n**Total differanse for alle parti:** Poll of polls = {total_diff_poll:.1f}, OneSixtyNine = {total_diff_modell:.1f} → **{best_total}** var best i sum! "
@@ -261,8 +278,7 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
     
     st.markdown(tekst)
 
-
-# --- Fråsegn / info ---
+# --- Info ---
 st.sidebar.markdown("""
 <hr>
 <p>
