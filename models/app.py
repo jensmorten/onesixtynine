@@ -157,7 +157,7 @@ forecast_upper_df_eom.index = forecast_upper_df_eom.index + MonthEnd(0)
 pred_datoer= [pd.Timestamp("2025-08-31"), pd.Timestamp("2025-09-30")]
 val_dato = pd.Timestamp("2025-09-08")
 val_resultat = {
-    'Ap': 28,
+    'Ap': 28.0,
     'Høgre': 14.6,
     'Frp': 23.8,
     'SV': 5.6,
