@@ -235,6 +235,9 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
     total_diff_poll = 0
     total_diff_modell = 0
     
+    modell_preds = {}
+    siste_polls = {}
+
     for parti, val_perc in val_resultat.items():
         siste_dato_poll = df.index[-1]
         siste_poll = df[parti].iloc[-1]
@@ -245,6 +248,9 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
                 pred_values.append(forecast_df[parti].loc[mnd])
         modell_pred = np.mean(pred_values) if pred_values else float('nan')
         
+        modell_preds[parti] = modell_pred
+        siste_polls[parti] = siste_poll
+
         diff_poll = abs(siste_poll - val_perc)
         diff_modell = abs(modell_pred - val_perc)
         
@@ -273,6 +279,43 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
     tekst += (
         f"\n\n**Total differanse for alle parti:** Poll of polls = {total_diff_poll:.1f}, OneSixtyNine = {total_diff_modell:.1f} → **{best_total}** var best i sum! "
     )
+    # --- Nytt: Blokk-samanlikning (Raudgrøn vs Blå) ---
+    raudgron = ['Raudt', 'SV', 'Ap', 'Sp', 'MDG']
+    bla = ['Høgre', 'Frp', 'KrF', 'Venstre']
+
+    # valresultat blokksum
+    val_raud = np.nansum([val_resultat.get(p, np.nan) for p in raudgron])
+    val_bla = np.nansum([val_resultat.get(p, np.nan) for p in bla])
+    val_vinnar = "raudgrøn" if val_raud > val_bla else "blå" if val_bla > val_raud else "ingen (likt)"
+
+    # poll blokksum
+    poll_raud = np.nansum([siste_polls.get(p, np.nan) for p in raudgron])
+    poll_bla = np.nansum([siste_polls.get(p, np.nan) for p in bla])
+    poll_vinnar = "raudgrøn" if poll_raud > poll_bla else "blå" if poll_bla > poll_raud else "ingen (likt)"
+
+    # modell blokksum
+    modell_raud = np.nansum([modell_preds.get(p, np.nan) for p in raudgron])
+    modell_bla = np.nansum([modell_preds.get(p, np.nan) for p in bla])
+    modell_vinnar = "raudgrøn" if modell_raud > modell_bla else "blå" if modell_bla > modell_raud else "ingen (likt)"
+
+    tekst += "\n\n### 🧾 Blokk-samanlikning — Raudgrøn vs Blå\n"
+
+    tekst += f"- **Valresultatet (2025):** {val_vinnar} side var størst.\n"
+    tekst += f"- **Siste poll (pollofpolls):** {poll_vinnar} side vart berekna størst.\n"
+    tekst += f"- **OneSixtyNine-modellen:** {modell_vinnar} side vart berekna størst.\n\n"
+
+    # vurder kven som hadde rett
+    poll_rett = (poll_vinnar == val_vinnar)
+    modell_rett = (modell_vinnar == val_vinnar)
+
+    if poll_rett and modell_rett:
+        tekst += "**Konklusjon:** Både Poll of polls og modellen berekna riktig blokk-vinnar. 🎯\n"
+    elif poll_rett and not modell_rett:
+        tekst += "**Konklusjon:** Poll of polls traff riktig blokk-vinnar, modellen gjorde det ikkje. 📊\n"
+    elif modell_rett and not poll_rett:
+        tekst += "**Konklusjon:** Modellen traff riktig blokk-vinnar, Poll of polls gjorde det ikkje. ✨\n"
+    else:
+        tekst += "**Konklusjon:** Ingen av dei berekna korrekt blokk-vinnar. ❌\n"
 
     tekst += "\n\nIkkje fornøygd? Juster parameterar i kontrollpanel og prøv igjen! ✨"
     
