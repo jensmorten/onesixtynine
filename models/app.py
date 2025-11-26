@@ -339,8 +339,8 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
                 pred_values.append(forecast_df[parti].loc[mnd])
 
         weights = np.array([3, 1])             
-        #modell_pred = np.mean(pred_values) if pred_values else float('nan')
-        modell_pred = np.average(pred_values, weights=weights[:len(pred_values)])
+        modell_pred = np.mean(pred_values) if pred_values else float('nan')
+        #modell_pred = np.average(pred_values, weights=weights[:len(pred_values)])
         #modell_pred = (3*pred_values[0]+pred_values[1])/4
         
         modell_preds[parti] = modell_pred
