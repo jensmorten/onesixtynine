@@ -338,7 +338,13 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
             if mnd in forecast_df.index:
                 pred_values.append(forecast_df[parti].loc[mnd])
         #modell_pred = np.mean(pred_values) if pred_values else float('nan')
-        modell_pred = (3*pred_values[0]+pred_values[1])/4
+        #modell_pred = (3*pred_values[0]+pred_values[1])/4
+        modell_pred = (
+            forecast_df
+                .loc[[pd.Timestamp("2025-09-30"), pd.Timestamp("2025-10-31")]]
+                .mul([0.75, 0.25], axis=0)
+                .sum()
+        )
 
         modell_preds[parti] = modell_pred
         siste_polls[parti] = siste_poll
