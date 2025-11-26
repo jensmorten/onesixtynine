@@ -281,12 +281,12 @@ for parti, prosent in val_resultat.items():
     ax.text(val_dato, prosent, "*", color=colors[parti], fontsize=20,
             ha="center", va="center", zorder=6)
 
-if prediksjonsmodus == "Utjamna":
+if smooth:
     indikator_tekst = "Utjamna prediksjon"
-elif prediksjonsmodus == "ML-optimert estimat":
+elif ml_opt:
     indikator_tekst = "ML-optimert estimat"
 else:
-    indikator_tekst = "Standard prediksjon"
+    indikator_tekst = "Standard VAR"
 
 if adjust:
     indikator_tekst += " | valjustert"
