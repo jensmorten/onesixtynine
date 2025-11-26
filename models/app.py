@@ -48,7 +48,7 @@ lags = st.sidebar.number_input(
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
     options={
-        "ML-optimert VAR (med XGBoost)"
+        "ML-optimert VAR (med XGBoost)",
         "Utjamna VAR (±2 månader)",
         "Standard VAR",
     },
