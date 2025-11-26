@@ -85,7 +85,7 @@ run_model = st.sidebar.button(
     help="Klikk for å berekne prognose med vald modellrekkevidde"
 )
 
-if not run_model:
+if not run_model and ml_opt:
     st.info("👈 Vel parameterar i kontrollpanelet og trykk **Køyr modell**")
     st.stop()
 
