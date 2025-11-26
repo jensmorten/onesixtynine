@@ -48,16 +48,16 @@ lags = st.sidebar.number_input(
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
     options={
-        "Standard VAR": "standard",
-        "Utjamna VAR (±2 månader)": "smooth",
-        "ML-optimert VAR + XGBoost": "ml"
+        "Standard VAR",
+        "Utjamna VAR (±2 månader)",
+        "ML-optimert VAR + XGBoost"
     },
     index=1
 )
 
 # Avleidde kontrollvariablar (brukast vidare i koden)
-smooth = (prediksjonsmodus == "smooth")
-ml_opt = (prediksjonsmodus == "ml")
+smooth = (prediksjonsmodus == "Utjamna VAR (±2 månader)")
+ml_opt = (prediksjonsmodus == "ML-optimert VAR + XGBoost")
 
 adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
