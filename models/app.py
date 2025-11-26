@@ -135,8 +135,8 @@ def hybrid_var_ml_forecast(
             yj = y[:, j]
 
             model = LGBMRegressor(
-                n_estimators=100,
-                num_leaves=31,
+                n_estimators=1000,
+                num_leaves=10,
                 learning_rate=0.05,
                 subsample=0.8,
                 colsample_bytree=0.8,
@@ -151,7 +151,7 @@ def hybrid_var_ml_forecast(
             r = model.predict(win.flatten().reshape(1, -1))[0]
             ml_resid_forecast[t, j] = r
             win = np.vstack([win[1:], mean_var[t]])
-            
+
     # --- Kombiner: ML justerer berre middel ---
     forecast = mean_var + ml_resid_forecast
     forecast_lower = lower_var + ml_resid_forecast
