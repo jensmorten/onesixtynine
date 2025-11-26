@@ -42,10 +42,6 @@ lags = st.sidebar.number_input(
     min_value=1, max_value=12, value=3, step=1
 )
 
-#smooth = st.sidebar.checkbox(
-#    "🔀Utjamna prediksjon, tilpassing med +/-2 månader", value=True
-#)
-
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
     options={
@@ -78,16 +74,16 @@ months_back_start = st.sidebar.number_input(
     min_value=0, max_value=months_back, value=0, step=1
 )
 
-st.sidebar.markdown("---")
+# st.sidebar.markdown("---")
 
-run_model = st.sidebar.button(
-    "🚀 Køyr modell",
-    help="Klikk for å berekne prognose med vald modellrekkevidde"
-)
+# run_model = st.sidebar.button(
+#     "🚀 Køyr modell",
+#     help="Klikk for å berekne prognose med vald modellrekkevidde"
+# )
 
-if not run_model and ml_opt:
-    st.info("👈 Du har vald ML-optimert prognose, vil ta litt tid. For å lage progrnose, trykk **Køyr modell**")
-    st.stop()
+# if not run_model and ml_opt:
+#     st.info("👈 Du har vald ML-optimert prognose, vil ta litt tid. For å lage progrnose, trykk **Køyr modell**")
+#     st.stop()
 
 if months_back_start > 0:
     df = df[:-months_back_start]
