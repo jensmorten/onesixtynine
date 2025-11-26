@@ -48,16 +48,16 @@ lags = st.sidebar.number_input(
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
     options={
-        "Standard VAR",
+        "ML-optimert VAR (med XGBoost)"
         "Utjamna VAR (±2 månader)",
-        "ML-optimert VAR + XGBoost"
+        "Standard VAR",
     },
     index=1
 )
 
 # Avleidde kontrollvariablar (brukast vidare i koden)
 smooth = (prediksjonsmodus == "Utjamna VAR (±2 månader)")
-ml_opt = (prediksjonsmodus == "ML-optimert VAR + XGBoost")
+ml_opt = (prediksjonsmodus == "ML-optimert VAR (med XGBoost)")
 
 adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
@@ -134,7 +134,6 @@ def hybrid_var_xgb_forecast(
             colsample_bytree=0.9,
             random_state=random_state,
             objective="reg:squarederror",
-            eval_metric="rmse"
         )
 
         xgb.fit(X, y)
@@ -183,11 +182,12 @@ if smooth:
     forecast_lower = np.mean(lowers, axis=0)
     forecast_upper = np.mean(uppers, axis=0)
 elif ml_opt:
-    forecast, forecast_lower, forecast_upper = hybrid_var_xgb_forecast(
-        df=df,
-        n_months=n_months,
-        var_lags=lags,
-        lags_ML=2*lags
+    with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen XGBoost blir tilpassa til VAR-modellens residualar"):
+        forecast, forecast_lower, forecast_upper = hybrid_var_xgb_forecast(
+            df=df,
+            n_months=n_months,
+            var_lags=lags,
+            lags_ML=lags
     )
 else:
     model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
