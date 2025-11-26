@@ -77,6 +77,17 @@ months_back_start = st.sidebar.number_input(
     min_value=0, max_value=months_back, value=0, step=1
 )
 
+st.sidebar.markdown("---")
+
+run_model = st.sidebar.button(
+    "🚀 Køyre modell",
+    help="Klikk for å berekne prognose med vald modellrekkevidde"
+)
+
+if not run_model:
+    st.info("👈 Vel parameterar i kontrollpanelet og trykk **Køyre modell**")
+    st.stop()
+
 if months_back_start > 0:
     df = df[:-months_back_start]
 
