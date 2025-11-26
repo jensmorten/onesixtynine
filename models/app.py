@@ -128,30 +128,6 @@ def hybrid_var_ml_forecast(
     if len(X) < 100:
         ml_resid_forecast = np.zeros_like(mean_var)
     else:
-        # model = XGBRegressor(
-        #     n_estimators=100,
-        #     max_depth=4,
-        #     learning_rate=0.05,
-        #     subsample=0.5,
-        #     random_state=random_state,
-        #     objective="reg:squarederror",
-        # )
-
-        # model = Ridge(
-        # alpha=1.0,      # regulerbar
-        # fit_intercept=True,
-        # random_state=random_state
-        # )
-
-        model=LGBMRegressor(
-        n_estimators=100,
-        num_leaves=31,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=random_state
-        )
-
         n_parties = df.shape[1]
         ml_resid_forecast = np.zeros((n_months, n_parties))
 
@@ -169,13 +145,13 @@ def hybrid_var_ml_forecast(
 
             model.fit(X, yj)
 
-    # rekursiv prognose
-    win = df.values[-lags_ML:].copy()
-    for t in range(n_months):
-        r = model.predict(win.flatten().reshape(1, -1))[0]
-        ml_resid_forecast[t, j] = r
-        win = np.vstack([win[1:], mean_var[t]])
-
+        # rekursiv prognose
+        win = df.values[-lags_ML:].copy()
+        for t in range(n_months):
+            r = model.predict(win.flatten().reshape(1, -1))[0]
+            ml_resid_forecast[t, j] = r
+            win = np.vstack([win[1:], mean_var[t]])
+            
     # --- Kombiner: ML justerer berre middel ---
     forecast = mean_var + ml_resid_forecast
     forecast_lower = lower_var + ml_resid_forecast
