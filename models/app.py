@@ -47,17 +47,17 @@ lags = st.sidebar.number_input(
 
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
-    options=[
-        "Standard",
-        "Utjamna prediksjon, tilpassing med +/-2 månader ",
-        "ML-optimert estimat med XGBoost"
-    ],
-    index=1  # default = Utjamna (same som før)
+    options={
+        "Standard VAR": "standard",
+        "Utjamna VAR (±2 månader)": "smooth",
+        "ML-optimert VAR + XGBoost": "ml"
+    },
+    index=1
 )
 
 # Avleidde kontrollvariablar (brukast vidare i koden)
-smooth = (prediksjonsmodus == "Utjamna")
-ml_opt = (prediksjonsmodus == "ML-optimert estimat")
+smooth = (prediksjonsmodus == "smooth")
+ml_opt = (prediksjonsmodus == "ml")
 
 adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
