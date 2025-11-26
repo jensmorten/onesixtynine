@@ -39,7 +39,7 @@ st.sidebar.markdown("### ⚙️ Set modellparametrar:", unsafe_allow_html=True)
 
 lags = st.sidebar.number_input(
     "📅 Talet på månader å bruke til tilpassing (trening) av modellen (maks 12):",
-    min_value=1, max_value=12, value=3, step=1
+    min_value=1, max_value=12, value=4, step=1
 )
 
 prediksjonsmodus = st.sidebar.radio(
