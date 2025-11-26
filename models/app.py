@@ -11,6 +11,7 @@ from collections import Counter
 from pandas.tseries.offsets import MonthEnd
 from xgboost import XGBRegressor
 from sklearn.linear_model import Ridge
+from lightgbm import LGBMRegressor
 
 # --- Streamlit-oppsett ---
 st.set_page_config(
@@ -86,13 +87,13 @@ run_model = st.sidebar.button(
 )
 
 if not run_model and ml_opt:
-    st.info("👈 Vel parameterar i kontrollpanelet og trykk **Køyr modell**")
+    st.info("👈 Du har vald ML-optimert prognose, vil ta litt tid. For å lage progrnose, trykk **Køyr modell**")
     st.stop()
 
 if months_back_start > 0:
     df = df[:-months_back_start]
 
-def hybrid_var_xgb_forecast(
+def hybrid_var_ml_forecast(
     df,
     n_months,
     var_lags,
@@ -139,6 +140,15 @@ def hybrid_var_xgb_forecast(
         model = Ridge(
         alpha=1.0,      # regulerbar
         fit_intercept=True,
+        random_state=random_state
+        )
+
+        model=LGBMRegressor(
+        n_estimators=100,
+        num_leaves=31,
+        learning_rate=0.05,
+        subsample=0.8,
+        colsample_bytree=0.8,
         random_state=random_state
         )
 
@@ -189,7 +199,7 @@ if smooth:
     forecast_upper = np.mean(uppers, axis=0)
 elif ml_opt:
     with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen XGBoost blir tilpassa til VAR-modellens residualar"):
-        forecast, forecast_lower, forecast_upper = hybrid_var_xgb_forecast(
+        forecast, forecast_lower, forecast_upper = hybrid_var_ml_forecast(
             df=df,
             n_months=n_months,
             var_lags=lags,
