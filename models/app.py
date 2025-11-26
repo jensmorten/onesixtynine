@@ -93,14 +93,7 @@ if not run_model and ml_opt:
 if months_back_start > 0:
     df = df[:-months_back_start]
 
-def hybrid_var_ml_forecast(
-    df,
-    n_months,
-    var_lags,
-    lags_ML,
-    random_state=123
-):
-    # --- VAR ---
+def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML):
     model = VAR(df)
     var_res = model.fit(maxlags=var_lags, method="ols", trend="n")
 
@@ -108,12 +101,10 @@ def hybrid_var_ml_forecast(
         var_res.endog, steps=n_months
     )
 
-    # --- Residualar frå VAR ---
     fitted = var_res.fittedvalues
     true = df.iloc[var_res.k_ar:]
     resid = true.values - fitted.values
 
-    # --- Designmatrise for ML ---
     X, y = [], []
     for i in range(lags_ML, len(df)):
         if i - var_res.k_ar < 0:
@@ -121,44 +112,37 @@ def hybrid_var_ml_forecast(
         X.append(df.iloc[i-lags_ML:i].values.flatten())
         y.append(resid[i - var_res.k_ar])
 
-    X = np.array(X)
-    y = np.array(y)
+    X = np.asarray(X)
+    y = np.asarray(y)
 
-    # Tryggleik: for lite data → bruk rein VAR
+    n_parties = df.shape[1]
+    ml_resid_forecast = np.zeros((n_months, n_parties))
+
     if len(X) < 100:
-        ml_resid_forecast = np.zeros_like(mean_var)
-    else:
-        n_parties = df.shape[1]
-        ml_resid_forecast = np.zeros((n_months, n_parties))
+        return mean_var, lower_var, upper_var
 
-        for j in range(n_parties):  # eitt parti om gongen
-            yj = y[:, j]
+    for j in range(n_parties):
+        yj = y[:, j]
 
-            model = LGBMRegressor(
-                n_estimators=1000,
-                num_leaves=10,
-                learning_rate=0.05,
-                subsample=0.5,
-                colsample_bytree=0.5,
-                random_state=random_state
-            )
+        model_ml = LGBMRegressor(
+            n_estimators=300,
+            num_leaves=10,
+            learning_rate=0.05,
+            subsample=0.6,
+            colsample_bytree=0.6,
+            random_state=123,
+        )
+        model_ml.fit(X, yj)
 
-            model.fit(X, yj)
-
-        # rekursiv prognose
         win = df.values[-lags_ML:].copy()
+
         for t in range(n_months):
-            r = model.predict(win.flatten().reshape(1, -1))[0]
+            r = model_ml.predict(win.reshape(1, -1))[0]
             ml_resid_forecast[t, j] = r
             win = np.vstack([win[1:], mean_var[t]])
 
-    # --- Kombiner: ML justerer berre middel ---
     forecast = mean_var + ml_resid_forecast
-    forecast_lower = lower_var + ml_resid_forecast
-    forecast_upper = upper_var + ml_resid_forecast
-
-    return forecast, forecast_lower, forecast_upper
-
+    return forecast, lower_var + ml_resid_forecast, upper_var + ml_resid_forecast
 
 # --- Tilpass VAR-modell for hovedlags ---
 model = VAR(df)
