@@ -63,7 +63,6 @@ adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
 )
 
-st.sidebar.write("DEBUG prediksjonsmodus:", smooth)
 
 n_months = st.sidebar.number_input(
     "📅 Månader framover å predikere:",
@@ -117,9 +116,9 @@ def hybrid_var_xgb_forecast(
         ml_resid_forecast = np.zeros_like(mean_var)
     else:
         xgb = XGBRegressor(
-            n_estimators=250,
-            max_depth=5,
-            learning_rate=0.03,
+            n_estimators=100,
+            max_depth=4,
+            learning_rate=0.05,
             subsample=0.9,
             colsample_bytree=0.9,
             random_state=random_state,
