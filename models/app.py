@@ -391,9 +391,9 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
 
     tekst += "\n\n### 🧾 Blokk-samanlikning — Raudgrøn vs Blå\n"
 
-    tekst += f"- **Valresultatet (2025):** {val_vinnar} side var størst.\n"
-    tekst += f"- **Siste poll (pollofpolls):** {poll_vinnar} side vart berekna størst.\n"
-    tekst += f"- **OneSixtyNine-modellen:** {modell_vinnar} side vart berekna størst.\n\n"
+    tekst += f"- **Valresultatet (2025):** {val_vinnar} side var størst. Raudgrøn side: {val_raud}, blå side: {val_bla} \n"
+    tekst += f"- **Siste poll (pollofpolls):** {poll_vinnar} side vart berekna størst. Raudgrøn side: {poll_raud}, blå side: {poll_bla}.\n"
+    tekst += f"- **OneSixtyNine-modellen:** {modell_vinnar} side vart berekna størst.  Raudgrøn side: {modell_raud}, blå side: {modell_bla}.\n\n"
 
     # vurder kven som hadde rett
     poll_rett = (poll_vinnar == val_vinnar)
