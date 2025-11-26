@@ -9,7 +9,6 @@ from statsmodels.tsa.api import VAR
 import matplotlib.ticker as mticker
 from collections import Counter
 from pandas.tseries.offsets import MonthEnd
-from xgboost import XGBRegressor
 from sklearn.linear_model import Ridge
 from lightgbm import LGBMRegressor
 
@@ -50,7 +49,7 @@ lags = st.sidebar.number_input(
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
     options={
-        "ML-optimert VAR (med XGBoost)",
+        "ML-optimert VAR (med LightGBM)",
         "Utjamna VAR (±2 månader)",
         "Standard VAR",
     },
@@ -59,7 +58,7 @@ prediksjonsmodus = st.sidebar.radio(
 
 # Avleidde kontrollvariablar (brukast vidare i koden)
 smooth = (prediksjonsmodus == "Utjamna VAR (±2 månader)")
-ml_opt = (prediksjonsmodus == "ML-optimert VAR (med XGBoost)")
+ml_opt = (prediksjonsmodus == "ML-optimert VAR (med LightGBM)")
 
 adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
