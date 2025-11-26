@@ -130,8 +130,7 @@ def hybrid_var_xgb_forecast(
             n_estimators=100,
             max_depth=4,
             learning_rate=0.05,
-            subsample=0.9,
-            colsample_bytree=0.9,
+            subsample=0.5,
             random_state=random_state,
             objective="reg:squarederror",
         )
