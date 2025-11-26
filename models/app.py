@@ -40,9 +40,23 @@ lags = st.sidebar.number_input(
     min_value=1, max_value=12, value=3, step=1
 )
 
-smooth = st.sidebar.checkbox(
-    "🔀Utjamna prediksjon, tilpassing med +/-2 månader", value=True
+#smooth = st.sidebar.checkbox(
+#    "🔀Utjamna prediksjon, tilpassing med +/-2 månader", value=True
+#)
+
+prediksjonsmodus = st.sidebar.radio(
+    "🧠 Prediksjonsmetode:",
+    options=[
+        "Standard",
+        "Utjamna prediksjon, tilpassing med +/-2 månader ",
+        "ML-optimert estimat med XGBoost"
+    ],
+    index=1  # default = Utjamna (same som før)
 )
+
+# Avleidde kontrollvariablar (brukast vidare i koden)
+smooth = (prediksjonsmodus == "Utjamna")
+ml_opt = (prediksjonsmodus == "ML-optimert estimat")
 
 adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
@@ -190,7 +204,13 @@ for parti, prosent in val_resultat.items():
     ax.text(val_dato, prosent, "*", color=colors[parti], fontsize=20,
             ha="center", va="center", zorder=6)
 
-indikator_tekst = "Utjamna prediksjon" if smooth else "Standard prediksjon"
+if prediksjonsmodus == "Utjamna":
+    indikator_tekst = "Utjamna prediksjon"
+elif prediksjonsmodus == "ML-optimert estimat":
+    indikator_tekst = "ML-optimert estimat"
+else:
+    indikator_tekst = "Standard prediksjon"
+
 if adjust:
     indikator_tekst += " | valjustert"
 
