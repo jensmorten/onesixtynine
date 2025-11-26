@@ -120,12 +120,11 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML):
         yj = y[:, j]
 
         model_ml = LGBMRegressor(
-            n_estimators=300,
+            n_estimators=500,
             num_leaves=16,
-            learning_rate=0.03,
+            learning_rate=0.01,
             subsample=0.8,
             colsample_bytree=0.8,
-            min_child_samples=20,
             random_state=123,
             verbose=-1
         )
