@@ -128,20 +128,20 @@ def hybrid_var_ml_forecast(
     if len(X) < 100:
         ml_resid_forecast = np.zeros_like(mean_var)
     else:
-        model = XGBRegressor(
-            n_estimators=100,
-            max_depth=4,
-            learning_rate=0.05,
-            subsample=0.5,
-            random_state=random_state,
-            objective="reg:squarederror",
-        )
+        # model = XGBRegressor(
+        #     n_estimators=100,
+        #     max_depth=4,
+        #     learning_rate=0.05,
+        #     subsample=0.5,
+        #     random_state=random_state,
+        #     objective="reg:squarederror",
+        # )
 
-        model = Ridge(
-        alpha=1.0,      # regulerbar
-        fit_intercept=True,
-        random_state=random_state
-        )
+        # model = Ridge(
+        # alpha=1.0,      # regulerbar
+        # fit_intercept=True,
+        # random_state=random_state
+        # )
 
         model=LGBMRegressor(
         n_estimators=100,
@@ -152,20 +152,29 @@ def hybrid_var_ml_forecast(
         random_state=random_state
         )
 
-        model.fit(X, y)
+        n_parties = df.shape[1]
+        ml_resid_forecast = np.zeros((n_months, n_parties))
 
-        # --- Rekursiv prediksjon av residualar ---
-        ml_resid_forecast = []
-        win = df.values[-lags_ML:].copy()
+        for j in range(n_parties):  # eitt parti om gongen
+            yj = y[:, j]
 
-        for t in range(n_months):
-            r = model.predict(win.flatten().reshape(1, -1))[0]
-            ml_resid_forecast.append(r)
+            model = LGBMRegressor(
+                n_estimators=100,
+                num_leaves=31,
+                learning_rate=0.05,
+                subsample=0.8,
+                colsample_bytree=0.8,
+                random_state=random_state
+            )
 
-            # flytt vindauge med VAR-middel
-            win = np.vstack([win[1:], mean_var[t]])
+            model.fit(X, yj)
 
-        ml_resid_forecast = np.array(ml_resid_forecast)
+    # rekursiv prognose
+    win = df.values[-lags_ML:].copy()
+    for t in range(n_months):
+        r = model.predict(win.flatten().reshape(1, -1))[0]
+        ml_resid_forecast[t, j] = r
+        win = np.vstack([win[1:], mean_var[t]])
 
     # --- Kombiner: ML justerer berre middel ---
     forecast = mean_var + ml_resid_forecast
