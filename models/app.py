@@ -136,7 +136,7 @@ def hybrid_var_ml_forecast(
 
             model = LGBMRegressor(
                 n_estimators=1000,
-                num_leaves=100,
+                num_leaves=10,
                 learning_rate=0.05,
                 subsample=0.5,
                 colsample_bytree=0.5,
