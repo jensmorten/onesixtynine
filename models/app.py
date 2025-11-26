@@ -63,7 +63,7 @@ adjust = st.sidebar.checkbox(
     "🔧 Juster prediksjon basert på val i 2021", value=False
 )
 
-st.sidebar.write("DEBUG prediksjonsmodus:", prediksjonsmodus)
+st.sidebar.write("DEBUG prediksjonsmodus:", smooth)
 
 n_months = st.sidebar.number_input(
     "📅 Månader framover å predikere:",
