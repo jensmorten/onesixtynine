@@ -10,6 +10,7 @@ import matplotlib.ticker as mticker
 from collections import Counter
 from pandas.tseries.offsets import MonthEnd
 from xgboost import XGBRegressor
+from sklearn.linear_model import Ridge
 
 # --- Streamlit-oppsett ---
 st.set_page_config(
@@ -80,12 +81,12 @@ months_back_start = st.sidebar.number_input(
 st.sidebar.markdown("---")
 
 run_model = st.sidebar.button(
-    "🚀 Køyre modell",
+    "🚀 Køyr modell",
     help="Klikk for å berekne prognose med vald modellrekkevidde"
 )
 
 if not run_model:
-    st.info("👈 Vel parameterar i kontrollpanelet og trykk **Køyre modell**")
+    st.info("👈 Vel parameterar i kontrollpanelet og trykk **Køyr modell**")
     st.stop()
 
 if months_back_start > 0:
@@ -95,7 +96,7 @@ def hybrid_var_xgb_forecast(
     df,
     n_months,
     var_lags,
-    lags_ML=6,
+    lags_ML,
     random_state=123
 ):
     # --- VAR ---
@@ -126,7 +127,7 @@ def hybrid_var_xgb_forecast(
     if len(X) < 100:
         ml_resid_forecast = np.zeros_like(mean_var)
     else:
-        xgb = XGBRegressor(
+        model = XGBRegressor(
             n_estimators=100,
             max_depth=4,
             learning_rate=0.05,
@@ -135,14 +136,20 @@ def hybrid_var_xgb_forecast(
             objective="reg:squarederror",
         )
 
-        xgb.fit(X, y)
+        model = Ridge(
+        alpha=1.0,      # regulerbar
+        fit_intercept=True,
+        random_state=random_state
+        )
+
+        model.fit(X, y)
 
         # --- Rekursiv prediksjon av residualar ---
         ml_resid_forecast = []
         win = df.values[-lags_ML:].copy()
 
         for t in range(n_months):
-            r = xgb.predict(win.flatten().reshape(1, -1))[0]
+            r = model.predict(win.flatten().reshape(1, -1))[0]
             ml_resid_forecast.append(r)
 
             # flytt vindauge med VAR-middel
