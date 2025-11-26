@@ -9,6 +9,7 @@ from statsmodels.tsa.api import VAR
 import matplotlib.ticker as mticker
 from collections import Counter
 from pandas.tseries.offsets import MonthEnd
+from xgboost import XGBRegressor
 
 # --- Streamlit-oppsett ---
 st.set_page_config(
@@ -78,9 +79,77 @@ months_back_start = st.sidebar.number_input(
 if months_back_start > 0:
     df = df[:-months_back_start]
 
+def hybrid_var_xgb_forecast(
+    df,
+    n_months,
+    var_lags,
+    lags_ML=6,
+    random_state=123
+):
+    # --- VAR ---
+    model = VAR(df)
+    var_res = model.fit(maxlags=var_lags, method="ols", trend="n")
+
+    mean_var, lower_var, upper_var = var_res.forecast_interval(
+        var_res.endog, steps=n_months
+    )
+
+    # --- Residualar frå VAR ---
+    fitted = var_res.fittedvalues
+    true = df.iloc[var_res.k_ar:]
+    resid = true.values - fitted.values
+
+    # --- Designmatrise for ML ---
+    X, y = [], []
+    for i in range(lags_ML, len(df)):
+        if i - var_res.k_ar < 0:
+            continue
+        X.append(df.iloc[i-lags_ML:i].values.flatten())
+        y.append(resid[i - var_res.k_ar])
+
+    X = np.array(X)
+    y = np.array(y)
+
+    # Tryggleik: for lite data → bruk rein VAR
+    if len(X) < 100:
+        ml_resid_forecast = np.zeros_like(mean_var)
+    else:
+        xgb = XGBRegressor(
+            n_estimators=250,
+            max_depth=5,
+            learning_rate=0.03,
+            subsample=0.9,
+            colsample_bytree=0.9,
+            random_state=random_state,
+            objective="reg:squarederror",
+            eval_metric="rmse"
+        )
+
+        xgb.fit(X, y)
+
+        # --- Rekursiv prediksjon av residualar ---
+        ml_resid_forecast = []
+        win = df.values[-lags_ML:].copy()
+
+        for t in range(n_months):
+            r = xgb.predict(win.flatten().reshape(1, -1))[0]
+            ml_resid_forecast.append(r)
+
+            # flytt vindauge med VAR-middel
+            win = np.vstack([win[1:], mean_var[t]])
+
+        ml_resid_forecast = np.array(ml_resid_forecast)
+
+    # --- Kombiner: ML justerer berre middel ---
+    forecast = mean_var + ml_resid_forecast
+    forecast_lower = lower_var + ml_resid_forecast
+    forecast_upper = upper_var + ml_resid_forecast
+
+    return forecast, forecast_lower, forecast_upper
+
+
 # --- Tilpass VAR-modell for hovedlags ---
 model = VAR(df)
-model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
 
 # --- Prediksjon ---
 if smooth:
@@ -101,7 +170,15 @@ if smooth:
     forecast = np.mean(preds, axis=0)
     forecast_lower = np.mean(lowers, axis=0)
     forecast_upper = np.mean(uppers, axis=0)
+elif ml_opt:
+    forecast, forecast_lower, forecast_upper = hybrid_var_xgb_forecast(
+        df=df,
+        n_months=n_months,
+        var_lags=lags,
+        lags_ML=2*lags
+    )
 else:
+    model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
     forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(
         model_fitted.endog, steps=n_months
     )
