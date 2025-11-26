@@ -136,10 +136,10 @@ def hybrid_var_ml_forecast(
 
             model = LGBMRegressor(
                 n_estimators=1000,
-                num_leaves=10,
+                num_leaves=100,
                 learning_rate=0.05,
-                subsample=0.8,
-                colsample_bytree=0.8,
+                subsample=0.5,
+                colsample_bytree=0.5,
                 random_state=random_state
             )
 
@@ -183,7 +183,7 @@ if smooth:
     forecast_lower = np.mean(lowers, axis=0)
     forecast_upper = np.mean(uppers, axis=0)
 elif ml_opt:
-    with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen XGBoost blir tilpassa til VAR-modellens residualar"):
+    with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar"):
         forecast, forecast_lower, forecast_upper = hybrid_var_ml_forecast(
             df=df,
             n_months=n_months,
