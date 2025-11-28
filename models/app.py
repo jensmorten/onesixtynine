@@ -156,11 +156,11 @@ if mode == "election":
     params = dict(
         tau=4.0,
         max_alpha=1.0,
-        vol_window=6,
+        vol_window=3,
     )
 else:
     params = dict(
-        tau=2.0,
+        tau=3.0,
         max_alpha=0.6,
         vol_window=6,
     )
