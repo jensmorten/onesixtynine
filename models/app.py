@@ -88,7 +88,7 @@ months_back_start = st.sidebar.number_input(
 if months_back_start > 0:
     df = df[:-months_back_start]
 
-def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau=6.0, vol_window=12, min_alpha=0.0, max_alpha=1.0):
+def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau=3.0, vol_window=6, min_alpha=0.0, max_alpha=1.0):
     """
     Hybrid VAR + ML with:
       - adaptive α per party
