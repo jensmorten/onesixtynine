@@ -40,7 +40,7 @@ st.sidebar.markdown("### ⚙️ Set modellparametrar:", unsafe_allow_html=True)
 
 aar = st.sidebar.number_input(
     "📅 Modellens treningsdata starter fra år",
-    min_value=2008, max_value=2018, value=2015, step=1
+    min_value=2008, max_value=2018, value=2011, step=1
 )
 
 start_år=aar
@@ -151,7 +151,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
 
         # --- ML model ---
         model_ml = LGBMRegressor(
-            n_estimators=500,
+            n_estimators=1500,
             num_leaves=16,
             learning_rate=0.01,
             subsample=0.8,
