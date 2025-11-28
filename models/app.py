@@ -26,7 +26,6 @@ df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # månadsslutt
 
 
-
 # --- Map kolonnenamn til nynorsk ---
 kolonne_map = {
     'Hoyre': 'Høgre',
@@ -208,24 +207,6 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
 model = VAR(df)
 
 # --- Prediksjon ---
-# if smooth:
-#     lags_list = [l for l in range(lags-2, lags+3) if 1 <= l <= 12]
-#     preds = []
-#     lowers = []
-#     uppers = []
-    
-#     for l in lags_list:
-#         model_fitted_tmp = model.fit(maxlags=l, method="ols", trend="n", verbose=False)
-#         forecast_tmp, forecast_lower_tmp, forecast_upper_tmp = model_fitted_tmp.forecast_interval(
-#             model_fitted_tmp.endog, steps=n_months
-#         )
-#         preds.append(forecast_tmp)
-#         lowers.append(forecast_lower_tmp)
-#         uppers.append(forecast_upper_tmp)
-    
-#     forecast = np.mean(preds, axis=0)
-#     forecast_lower = np.mean(lowers, axis=0)
-#     forecast_upper = np.mean(uppers, axis=0)
 if  ml_opt:
     with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. "):
         forecast, forecast_lower, forecast_upper = hybrid_var_ml_forecast(
@@ -251,31 +232,6 @@ forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
 forecast_lower_df = pd.DataFrame(forecast_lower, index=forecast_index, columns=df.columns)
 forecast_upper_df = pd.DataFrame(forecast_upper, index=forecast_index, columns=df.columns)
 
-# # --- Juster prediksjon for val ---
-# if adjust:
-#     justeringar = {
-#         'Ap': 2.0,
-#         'Høgre': -0.2,
-#         'Frp': 1.5,
-#         'SV': -0.5,
-#         'Sp': -0.5,
-#         'KrF': 0.4,
-#         'Venstre': 1.1,
-#         'MDG': -0.8,
-#         'Raudt': -0.6,
-#         'Andre': -0.2
-#     }
-
-#     for parti, adj in justeringar.items():
-#         if parti in forecast_df.columns:
-#             forecast_df[parti] += adj
-#             #forecast_lower_df[parti] += adj
-#             #forecast_upper_df[parti] += adj
-
-    # Normaliser til 100 % igjen
-    #forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
-    #forecast_lower_df = forecast_lower_df.div(forecast_lower_df.sum(axis=1), axis=0) * 100
-    #forecast_upper_df = forecast_upper_df.div(forecast_upper_df.sum(axis=1), axis=0) * 100
 
 # --- Formatering av datoar ---
 norske_mnd = {
