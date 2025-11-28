@@ -213,7 +213,7 @@ if  ml_opt:
         forecast, forecast_lower, forecast_upper = hybrid_var_ml_forecast(
             df=df,
             n_months=n_months,
-            var_lags=4,
+            var_lags=3,
             lags_ML=12,
             tau=6,
             vol_window=6,
