@@ -137,11 +137,11 @@ def get_forecast_mode(
     m2e = abs(months_between(forecast_start, election_date))
 
     if m2e <= election_window:
-        return "election"
+        return "valkamp"
     else:
-        return "normal"
+        return "mellomval"
 
-mode='normal'
+mode='mellomval'
 
 if months_back_start > 0:
     df = df[:-months_back_start]
@@ -152,7 +152,7 @@ if months_back_start > 0:
         election_window=3
 )
 
-if mode == "election":
+if mode == "valkamp":
     params = dict(
         tau=4.0,
         max_alpha=1.0,
