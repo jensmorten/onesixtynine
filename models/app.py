@@ -119,7 +119,7 @@ def get_relevant_election_date(forecast_start, election_dates):
 def get_forecast_mode(
     forecast_start,
     election_dates,
-    election_window=6
+    election_window=12
 ):
     """
     Determine whether election mode should be active,
