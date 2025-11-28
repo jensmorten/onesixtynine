@@ -156,11 +156,11 @@ if mode == "election":
     params = dict(
         tau=4.0,
         max_alpha=1.0,
-        vol_window=3,
+        vol_window=6,
     )
 else:
     params = dict(
-        tau=3.0,
+        tau=4.0,
         max_alpha=0.6,
         vol_window=6,
     )
@@ -461,7 +461,7 @@ sjekk_dato = pd.Timestamp("2025-08-01")
 
 if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.index for d in pred_datoer):
     tekst = "### 🎯 Sjekk kor godt OneSixtyNine predikerer valresultatet i 2025!\n\n"
-    tekst += f" Vi set dagens dato til {df.index[-1].strftime('%d. %b %Y')} \n\n"
+    tekst += f" Vi set dagens dato til {df.index[-1].strftime('%d. %b %Y')} og modellen er i {mode} modus \n\n"
     
     resultat_per_parti = {}
     total_diff_poll = 0
