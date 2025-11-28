@@ -40,7 +40,7 @@ st.sidebar.markdown("### ⚙️ Set modellparametrar:", unsafe_allow_html=True)
 
 aar = st.sidebar.number_input(
     "📅 Modellens treningsdata starter fra år",
-    min_value=2008, max_value=2018, value=2011, step=1
+    min_value=2008, max_value=2018, value=2015, step=1
 )
 
 start_år=aar
