@@ -483,8 +483,8 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
         #modell_pred = np.mean(pred_values) if pred_values else float('nan')
         modell_pred = np.average(pred_values, weights=weights[:len(pred_values)])
         
-        modell_preds[parti] = modell_pred
-        siste_polls[parti] = siste_poll
+        modell_preds[parti] = np.round(modell_pred,1)
+        siste_polls[parti] = np.round(siste_poll,1)
 
         diff_poll = abs(siste_poll - val_perc)
         diff_modell = abs(modell_pred - val_perc)
