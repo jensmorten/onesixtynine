@@ -25,7 +25,7 @@ df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
 df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # månadsslutt
 
-start_år=12
+start_år=5
 df = df[start_år*12:]
 
 # --- Map kolonnenamn til nynorsk ---
