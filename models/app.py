@@ -215,7 +215,7 @@ if  ml_opt:
             var_lags=4,
             lags_ML=12,
             tau=6,
-            vol_window=6,
+            vol_window=12,
             min_alpha=0.2,
             max_alpha=1.0,
     )
