@@ -25,7 +25,7 @@ df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
 df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # månadsslutt
 
-start_år=5
+start_år=6
 df = df[start_år*12:]
 
 # --- Map kolonnenamn til nynorsk ---
@@ -122,7 +122,7 @@ def get_relevant_election_date(forecast_start, election_dates):
 def get_forecast_mode(
     forecast_start,
     election_dates,
-    election_window=12
+    election_window,
 ):
     """
     Determine whether election mode should be active,
