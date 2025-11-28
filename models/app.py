@@ -119,7 +119,7 @@ def get_relevant_election_date(forecast_start, election_dates):
 def get_forecast_mode(
     forecast_start,
     election_dates,
-    election_window=2
+    election_window=3
 ):
     """
     Determine whether election mode should be active,
@@ -141,13 +141,15 @@ def get_forecast_mode(
     else:
         return "normal"
 
+mode='normal'
+
 if months_back_start > 0:
     df = df[:-months_back_start]
     forecast_start = df.index[-1] 
     mode = get_forecast_mode(
         forecast_start,
         ELECTION_DATES,
-        election_window=2
+        election_window=3
 )
 
 if mode == "election":
