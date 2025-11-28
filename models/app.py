@@ -88,7 +88,15 @@ months_back_start = st.sidebar.number_input(
 if months_back_start > 0:
     df = df[:-months_back_start]
 
-def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML):
+def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau=6.0, vol_window=12, min_alpha=0.0, max_alpha=1.0):
+    """
+    Hybrid VAR + ML with:
+      - adaptive α per party
+      - regime gating based on volatility ratio
+      - horizon decay
+
+    Regime strength = recent_vol / long_run_vol
+    """
     model = VAR(df)
     var_res = model.fit(maxlags=var_lags, method="ols", trend="n")
 
@@ -96,10 +104,12 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML):
         var_res.endog, steps=n_months
     )
 
+    # VAR residuals (in-sample)
     fitted = var_res.fittedvalues
     true = df.iloc[var_res.k_ar:]
     resid = true.values - fitted.values
 
+    # Build ML dataset
     X, y = [], []
     for i in range(lags_ML, len(df)):
         if i - var_res.k_ar < 0:
@@ -116,9 +126,29 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML):
     if len(X) < 100:
         return mean_var, lower_var, upper_var
 
+    # Pre-compute volatility regime indicators
+    ddf = df.diff()
+
+    recent_vol = (
+        ddf.iloc[-vol_window:]
+        .abs()
+        .mean(axis=0)
+        .values
+    )
+
+    long_run_vol = (
+        ddf.abs()
+        .mean(axis=0)
+        .values
+        + 1e-8
+    )
+
+    regime_strength = recent_vol / long_run_vol  # per party
+
     for j in range(n_parties):
         yj = y[:, j]
 
+        # --- ML model ---
         model_ml = LGBMRegressor(
             n_estimators=500,
             num_leaves=16,
@@ -130,15 +160,47 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML):
         )
         model_ml.fit(X, yj)
 
+        # --- adaptive α (in-sample calibration) ---
+        y_hat_train = model_ml.predict(X)
+
+        num = np.dot(yj, y_hat_train)
+        den = np.dot(y_hat_train, y_hat_train) + 1e-8
+        alpha_j = num / den
+        alpha_j = float(np.clip(alpha_j, min_alpha, max_alpha))
+
+        # --- regime-gated weight ---
+        rs = regime_strength[j]
+
+        if rs < 0.8:
+            regime_weight = 0.0         # calm regime → VAR only
+        elif rs < 1.2:
+            regime_weight = (rs - 0.8) / (1.2 - 0.8)  # linear ramp [0,1]
+        else:
+            regime_weight = 1.0         # regime change
+
+        # --- forecasting ---
         win = df.values[-lags_ML:].copy()
 
         for t in range(n_months):
-            r = model_ml.predict(win.reshape(1, -1))[0]
+            r_raw = model_ml.predict(win.reshape(1, -1))[0]
+
+            if tau is not None:
+                time_decay = np.exp(-t / tau)
+            else:
+                time_decay = 1.0
+
+            r = alpha_j * regime_weight * time_decay * r_raw
+
             ml_resid_forecast[t, j] = r
+
+            # IMPORTANT: no feedback of corrected forecast
             win = np.vstack([win[1:], mean_var[t]])
 
     forecast = mean_var + ml_resid_forecast
-    return forecast, lower_var + ml_resid_forecast, upper_var + ml_resid_forecast
+    lower = lower_var + ml_resid_forecast
+    upper = upper_var + ml_resid_forecast
+
+    return forecast, lower, upper
 
 # --- Tilpass VAR-modell for hovedlags ---
 model = VAR(df)
