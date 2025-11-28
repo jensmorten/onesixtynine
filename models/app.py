@@ -486,8 +486,8 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
         modell_preds[parti] = np.round(modell_pred,1)
         siste_polls[parti] = np.round(siste_poll,1)
 
-        diff_poll = abs(siste_poll - val_perc)
-        diff_modell = abs(modell_pred - val_perc)
+        diff_poll = round(abs(siste_poll - val_perc),1)
+        diff_modell = round(abs(modell_pred - val_perc),1)
         
         total_diff_poll += diff_poll
         total_diff_modell += diff_modell
