@@ -25,7 +25,7 @@ df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
 df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # månadsslutt
 
-start_år=3
+start_år=2
 df = df[start_år*12:]
 
 # --- Map kolonnenamn til nynorsk ---
@@ -88,87 +88,12 @@ months_back_start = st.sidebar.number_input(
 #     st.info("👈 Du har vald ML-optimert prognose, vil ta litt tid. For å lage progrnose, trykk **Køyr modell**")
 #     st.stop()
 
-ELECTION_DATES = pd.to_datetime([
-    "2009-09-30",
-    "2013-09-30",
-    "2017-09-30",
-    "2021-09-30",
-    "2025-09-30",
-    "2029-09-30",   # assumed future election
-])
 
-def months_between(a, b):
-    """
-    Signed whole-month difference: b - a
-    """
-    return (b.year - a.year) * 12 + (b.month - a.month)
-
-def get_relevant_election_date(forecast_start, election_dates):
-    """
-    Returns the closest relevant election date
-    relative to forecast_start.
-    """
-
-    future = election_dates[election_dates >= forecast_start]
-    past   = election_dates[election_dates < forecast_start]
-
-    if len(future) > 0:
-        return future[0]   # next election
-    elif len(past) > 0:
-        return past[-1]    # last election
-    else:
-        return None
-
-def get_forecast_mode(
-    forecast_start,
-    election_dates,
-    election_window,
-):
-    """
-    Determine whether election mode should be active,
-    based on proximity to the nearest relevant election.
-    """
-
-    election_date = get_relevant_election_date(
-        forecast_start,
-        election_dates
-    )
-
-    if election_date is None:
-        return "normal"
-
-    m2e = abs(months_between(forecast_start, election_date))
-
-    if m2e <= election_window:
-        return "valkamp"
-    else:
-        return "mellomval"
-
-mode='mellomval'
 
 if months_back_start > 0:
     df = df[:-months_back_start]
-    forecast_start = df.index[-1] 
-    mode = get_forecast_mode(
-        forecast_start,
-        ELECTION_DATES,
-        election_window=6
-)
 
-if mode == "valkamp":
-    params = dict(
-        tau=4.0,
-        max_alpha=1.0,
-        vol_window=6,
-    )
-else:
-    params = dict(
-        tau=4.0,
-        max_alpha=0.6,
-        vol_window=6,
-    )
-
-def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau=4.0, vol_window=6, min_alpha=0.0, max_alpha=1.0):
+def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min_alpha, max_alpha):
     """
     Hybrid VAR + ML with:
       - adaptive α per party
@@ -311,9 +236,10 @@ elif ml_opt:
             n_months=n_months,
             var_lags=lags,
             lags_ML=12,
-            tau=params["tau"],
-            vol_window=params["vol_window"],
-            max_alpha=params["max_alpha"],
+            tau=4,
+            vol_window=6,
+            min_alpha=0.0,
+            max_alpha=1.0,
     )
 else:
     model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
@@ -464,7 +390,7 @@ sjekk_dato = pd.Timestamp("2025-08-01")
 
 if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.index for d in pred_datoer):
     tekst = "### 🎯 Sjekk kor godt OneSixtyNine predikerer valresultatet i 2025!\n\n"
-    tekst += f" Vi set dagens dato til {df.index[-1].strftime('%d. %b %Y')} og modellen er i {mode} modus \n\n"
+    tekst += f" Vi set dagens dato til {df.index[-1].strftime('%d. %b %Y')} \n\n"
     
     resultat_per_parti = {}
     total_diff_poll = 0
