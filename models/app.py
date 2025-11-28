@@ -216,7 +216,7 @@ if  ml_opt:
             lags_ML=12,
             tau=4,
             vol_window=6,
-            min_alpha=0.0,
+            min_alpha=0.2,
             max_alpha=1.0,
     )
 else:
