@@ -179,7 +179,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         else:
             regime_weight = 1.0         # regime change
         
-        regime_weight = 1.0 
+        #regime_weight = 1.0 
         # --- forecasting ---
         win = df.values[-lags_ML:].copy()
 
@@ -216,7 +216,7 @@ if  ml_opt:
             var_lags=4,
             lags_ML=12,
             tau=6,
-            vol_window=6,
+            vol_window=3,
             min_alpha=0.2,
             max_alpha=1.0,
     )
