@@ -25,8 +25,7 @@ df = pd.read_csv(url, index_col="Mnd", parse_dates=True)
 df = df.sort_index()
 df.index = df.index.to_period('M').to_timestamp('M')  # månadsslutt
 
-start_år=3
-df = df[start_år*12:]
+
 
 # --- Map kolonnenamn til nynorsk ---
 kolonne_map = {
@@ -40,29 +39,27 @@ df = df.rename(columns=kolonne_map)
 st.sidebar.title("Kontrollpanel")
 st.sidebar.markdown("### ⚙️ Set modellparametrar:", unsafe_allow_html=True)
 
-lags = st.sidebar.number_input(
-    "📅 Talet på månader å bruke til tilpassing (trening) av modellen (maks 12):",
-    min_value=1, max_value=12, value=4, step=1
+aar = st.sidebar.number_input(
+    "📅 Modellens treningsdata starter fra år",
+    min_value=2008, max_value=2018, value=2011, step=1
 )
+
+start_år=aar
+antall_ar=aar-2008
+if antall_ar>0:
+    df = df[antall_ar*12:]
 
 prediksjonsmodus = st.sidebar.radio(
     "🧠 Prediksjonsmetode:",
     options={
         "ML-optimert VAR (med LightGBM)",
-        "Utjamna VAR (±2 månader)",
         "Standard VAR",
     },
     index=1
 )
 
 # Avleidde kontrollvariablar (brukast vidare i koden)
-smooth = (prediksjonsmodus == "Utjamna VAR (±2 månader)")
 ml_opt = (prediksjonsmodus == "ML-optimert VAR (med LightGBM)")
-
-adjust = st.sidebar.checkbox(
-    "🔧 Juster prediksjon basert på val i 2021", value=False
-)
-
 
 n_months = st.sidebar.number_input(
     "📅 Månader framover å predikere:",
@@ -211,30 +208,30 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
 model = VAR(df)
 
 # --- Prediksjon ---
-if smooth:
-    lags_list = [l for l in range(lags-2, lags+3) if 1 <= l <= 12]
-    preds = []
-    lowers = []
-    uppers = []
+# if smooth:
+#     lags_list = [l for l in range(lags-2, lags+3) if 1 <= l <= 12]
+#     preds = []
+#     lowers = []
+#     uppers = []
     
-    for l in lags_list:
-        model_fitted_tmp = model.fit(maxlags=l, method="ols", trend="n", verbose=False)
-        forecast_tmp, forecast_lower_tmp, forecast_upper_tmp = model_fitted_tmp.forecast_interval(
-            model_fitted_tmp.endog, steps=n_months
-        )
-        preds.append(forecast_tmp)
-        lowers.append(forecast_lower_tmp)
-        uppers.append(forecast_upper_tmp)
+#     for l in lags_list:
+#         model_fitted_tmp = model.fit(maxlags=l, method="ols", trend="n", verbose=False)
+#         forecast_tmp, forecast_lower_tmp, forecast_upper_tmp = model_fitted_tmp.forecast_interval(
+#             model_fitted_tmp.endog, steps=n_months
+#         )
+#         preds.append(forecast_tmp)
+#         lowers.append(forecast_lower_tmp)
+#         uppers.append(forecast_upper_tmp)
     
-    forecast = np.mean(preds, axis=0)
-    forecast_lower = np.mean(lowers, axis=0)
-    forecast_upper = np.mean(uppers, axis=0)
-elif ml_opt:
+#     forecast = np.mean(preds, axis=0)
+#     forecast_lower = np.mean(lowers, axis=0)
+#     forecast_upper = np.mean(uppers, axis=0)
+if  ml_opt:
     with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. "):
         forecast, forecast_lower, forecast_upper = hybrid_var_ml_forecast(
             df=df,
             n_months=n_months,
-            var_lags=lags,
+            var_lags=4,
             lags_ML=12,
             tau=4,
             vol_window=6,
@@ -242,7 +239,7 @@ elif ml_opt:
             max_alpha=1.0,
     )
 else:
-    model_fitted = model.fit(maxlags=lags, method="ols", trend="n", verbose=False)
+    model_fitted = model.fit(maxlags=4, method="ols", trend="n", verbose=False)
     forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(
         model_fitted.endog, steps=n_months
     )
@@ -254,29 +251,29 @@ forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
 forecast_lower_df = pd.DataFrame(forecast_lower, index=forecast_index, columns=df.columns)
 forecast_upper_df = pd.DataFrame(forecast_upper, index=forecast_index, columns=df.columns)
 
-# --- Juster prediksjon for val ---
-if adjust:
-    justeringar = {
-        'Ap': 2.0,
-        'Høgre': -0.2,
-        'Frp': 1.5,
-        'SV': -0.5,
-        'Sp': -0.5,
-        'KrF': 0.4,
-        'Venstre': 1.1,
-        'MDG': -0.8,
-        'Raudt': -0.6,
-        'Andre': -0.2
-    }
+# # --- Juster prediksjon for val ---
+# if adjust:
+#     justeringar = {
+#         'Ap': 2.0,
+#         'Høgre': -0.2,
+#         'Frp': 1.5,
+#         'SV': -0.5,
+#         'Sp': -0.5,
+#         'KrF': 0.4,
+#         'Venstre': 1.1,
+#         'MDG': -0.8,
+#         'Raudt': -0.6,
+#         'Andre': -0.2
+#     }
 
-    for parti, adj in justeringar.items():
-        if parti in forecast_df.columns:
-            forecast_df[parti] += adj
-            #forecast_lower_df[parti] += adj
-            #forecast_upper_df[parti] += adj
+#     for parti, adj in justeringar.items():
+#         if parti in forecast_df.columns:
+#             forecast_df[parti] += adj
+#             #forecast_lower_df[parti] += adj
+#             #forecast_upper_df[parti] += adj
 
     # Normaliser til 100 % igjen
-    forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
+    #forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
     #forecast_lower_df = forecast_lower_df.div(forecast_lower_df.sum(axis=1), axis=0) * 100
     #forecast_upper_df = forecast_upper_df.div(forecast_upper_df.sum(axis=1), axis=0) * 100
 
@@ -345,15 +342,10 @@ for parti, prosent in val_resultat.items():
     ax.text(val_dato, prosent, "*", color=colors[parti], fontsize=20,
             ha="center", va="center", zorder=6)
 
-if smooth:
-    indikator_tekst = "Utjamna prediksjon"
-elif ml_opt:
+if ml_opt:
     indikator_tekst = "ML-optimert estimat"
 else:
     indikator_tekst = "Standard VAR"
-
-if adjust:
-    indikator_tekst += " | valjustert"
 
 ax.text(forecast_df_eom.index[-1], 38, indikator_tekst, fontsize=10, color='gray', ha='right')
 
@@ -365,7 +357,7 @@ ax.xaxis.set_major_formatter(mticker.FuncFormatter(norsk_dato_formatter))
 siste_dato = df.index[-1]
 siste_dato_norsk = f"{siste_dato.day}. {norske_mnd[siste_dato.month]} {siste_dato.year}"
 ax.set_title(
-    f"Prediksjon basert på {lags} månaders historikk, {n_months} månader framover frå {siste_dato_norsk}",
+    f"Prediksjon basert på historikk fra {aar},  {n_months} månader framover frå {siste_dato_norsk}",
     fontsize=12, pad=20
 )
 
