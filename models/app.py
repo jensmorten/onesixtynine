@@ -229,7 +229,7 @@ else:
 forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='M')[1:]
 
 forecast_df = pd.DataFrame(forecast, index=forecast_index, columns=df.columns)
-#forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
+forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
 forecast_lower_df = pd.DataFrame(forecast_lower, index=forecast_index, columns=df.columns)
 forecast_upper_df = pd.DataFrame(forecast_upper, index=forecast_index, columns=df.columns)
 
