@@ -149,7 +149,7 @@ if months_back_start > 0:
     mode = get_forecast_mode(
         forecast_start,
         ELECTION_DATES,
-        election_window=3
+        election_window=12
 )
 
 if mode == "valkamp":
