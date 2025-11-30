@@ -198,7 +198,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
             # IMPORTANT: no feedback of corrected forecast
             win = np.vstack([win[1:], mean_var[t]])
 
-    forecast = mean_var + ml_resid_forecast*10
+    forecast = mean_var + ml_resid_forecast
     lower = lower_var + ml_resid_forecast
     upper = upper_var + ml_resid_forecast
 
