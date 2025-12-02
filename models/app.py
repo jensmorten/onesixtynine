@@ -225,9 +225,8 @@ if  ml_opt:
     )
 else:
     model_fitted = model.fit(maxlags=4, method="ols", trend="n", verbose=False)
-    forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(
-        model_fitted.endog, steps=n_months
-    )
+    forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(model_fitted.endog, steps=n_months)
+    in_change=None
 
 forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='M')[1:]
 
@@ -338,11 +337,12 @@ ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
 
-in_change_txt = (
-    "Partier med sterk endring der ML-optimering er aktiv: "
-    + ", ".join(in_change)
-)
-st.markdown(in_change_txt)
+if in_change:
+    in_change_txt = (
+        "Partier med sterk endring der ML-optimering er aktiv: "
+        + ", ".join(in_change)
+    )
+    st.markdown(in_change_txt)
 
 # --- Validering (same as before) ---
 sjekk_dato = pd.Timestamp("2025-08-01")
