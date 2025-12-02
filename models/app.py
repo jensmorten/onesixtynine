@@ -339,8 +339,11 @@ if in_change:
 sjekk_dato = pd.Timestamp("2025-08-01")
 
 if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.index for d in pred_datoer):
+    d = forecast_df_eom.index[-1]
+    dato_txt = f"{d.day}. {norske_mnd[d.month]} {d.year}"
+
     tekst = "### 🎯 Sjekk kor godt OneSixtyNine predikerer valresultatet i 2025!\n\n"
-    tekst += f" Vi set dagens dato til {df.index[-1].strftime('%d. %b %Y')} \n\n"
+    tekst += f" Vi set dagens dato til {dato_txt} \n\n"
     
     resultat_per_parti = {}
     total_diff_poll = 0
@@ -461,8 +464,7 @@ if months_back_start == 0:
         vinnar = "uavgjort"
 
     text += (
-        "\n---\n"
-        "Blokksum\n\n"
+        "Resultat per blokk: \n\n"
         f"- **Raudgrøn blokk**: {raudgron_sum:.1f} %\n"
         f"- **Blå blokk**: {bla_sum:.1f} %\n\n"
         f"🏁 **Største blokk:** **{vinnar}**"
