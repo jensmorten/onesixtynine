@@ -203,7 +203,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
     lower = lower_var + ml_resid_forecast
     upper = upper_var + ml_resid_forecast
 
-    mask = regime_strength > 1.1
+    mask = regime_strength > 1.2
 
     in_change = (
         df.columns[mask]
