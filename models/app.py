@@ -330,7 +330,7 @@ st.pyplot(fig, use_container_width=False)
 
 if in_change:
     in_change_txt = (
-        "Partier med sterk endring der ML-optimering er aktiv (frå høgast til lågast): "
+        "Parti med sterk relativ endring der ML-optimering er aktiv (frå høgast til lågast): "
         + ", ".join(in_change)
     )
     st.markdown(in_change_txt)
