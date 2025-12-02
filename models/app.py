@@ -217,7 +217,7 @@ if  ml_opt:
             n_months=n_months,
             var_lags=4,
             lags_ML=12,
-            tau=12,
+            tau=6,
             vol_window=3,
             min_alpha=0.2,
             max_alpha=1.0,
