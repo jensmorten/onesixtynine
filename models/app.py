@@ -191,7 +191,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
             else:
                 time_decay = 1.0
 
-            gamma=5
+            gamma=10
 
             r = alpha_j * regime_weight * time_decay * r_raw * gamma
 
@@ -217,7 +217,7 @@ if  ml_opt:
             n_months=n_months,
             var_lags=4,
             lags_ML=12,
-            tau=6,
+            tau=12,
             vol_window=3,
             min_alpha=0.2,
             max_alpha=1.0,
