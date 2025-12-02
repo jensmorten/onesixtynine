@@ -186,14 +186,12 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
             r_raw = model_ml.predict(win.reshape(1, -1))[0]
 
             if tau is not None:
-                time_decay = np.exp(-t / tau)
+                time_decay = np.exp(-(t-1) / tau)
             else:
                 time_decay = 1.0
 
-            gamma=1
-
-            r = alpha_j * regime_weight * time_decay * r_raw * gamma
-
+            #r = alpha_j * regime_weight * time_decay * r_raw 
+            r = regime_weight * time_decay * r_raw 
             ml_resid_forecast[t, j] = r
 
             # IMPORTANT: no feedback of corrected forecast
@@ -225,7 +223,7 @@ if  ml_opt:
             var_lags=4,
             lags_ML=12,
             tau=6,
-            vol_window=6,
+            vol_window=3,
             min_alpha=0.2,
             max_alpha=1.0,
     )
