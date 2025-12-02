@@ -203,7 +203,13 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
     lower = lower_var + ml_resid_forecast
     upper = upper_var + ml_resid_forecast
 
-    in_change = df.columns[regime_strength > 0.8].tolist()
+    mask = regime_strength > 0.8
+
+    in_change = (
+        df.columns[mask]
+        [np.argsort(regime_strength[mask])[::-1]]
+        .tolist()
+    )
 
     return forecast, lower, upper, in_change
 
@@ -339,7 +345,7 @@ st.pyplot(fig, use_container_width=False)
 
 if in_change:
     in_change_txt = (
-        "Partier med sterk endring der ML-optimering er aktiv: "
+        "Partier med sterk endring der ML-optimering er aktiv (frå høgast til lågast): "
         + ", ".join(in_change)
     )
     st.markdown(in_change_txt)
