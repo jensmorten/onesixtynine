@@ -437,7 +437,7 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
 
 if months_back_start == 0:
     text= "Dersom det var Stortingsval i enden av den predikerte perioden:"
-    st.markdown(tekst)
+    st.markdown(text)
 
 
 # --- Info ---
