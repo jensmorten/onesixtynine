@@ -89,7 +89,7 @@ months_back_start = st.sidebar.number_input(
 if months_back_start > 0:
     df = df[:-months_back_start]
 
-def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min_alpha, max_alpha):
+def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window):
     """
     Hybrid VAR + ML with:
       - adaptive α per party
@@ -161,23 +161,13 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         )
         model_ml.fit(X, yj)
 
-        # --- adaptive α (in-sample calibration) ---
-        y_hat_train = model_ml.predict(X)
-
-        #num = np.dot(yj, y_hat_train)
-        #den = np.dot(y_hat_train, y_hat_train) + 1e-8
-        #alpha_j = num / den
-        #alpha_j = float(np.clip(alpha_j, min_alpha, max_alpha))
-
         # --- regime-gated weight ---
         rs = regime_strength[j]
 
         if rs < 1.2:
             regime_weight = 0.0         # calm regime → VAR only
-        #elif rs < 1.2:
-        #    regime_weight = 4*(rs - 0.8) / (1.2 - 0.8)  # linear ramp 
         else:
-            regime_weight = 3.0         # regime change
+            regime_weight = 4.0         # regime change
         
         # --- forecasting ---
         win = df.values[-lags_ML:].copy()
@@ -190,7 +180,6 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
             else:
                 time_decay = 1.0
 
-            #r = alpha_j * regime_weight * time_decay * r_raw 
             r = regime_weight * time_decay * r_raw 
             ml_resid_forecast[t, j] = r
 
@@ -223,9 +212,7 @@ if  ml_opt:
             var_lags=4,
             lags_ML=12,
             tau=6,
-            vol_window=3,
-            min_alpha=0.2,
-            max_alpha=1.0,
+            vol_window=3
     )
 else:
     model_fitted = model.fit(maxlags=4, method="ols", trend="n", verbose=False)
