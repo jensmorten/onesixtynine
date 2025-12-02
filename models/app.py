@@ -175,9 +175,9 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         if rs < 0.8:
             regime_weight = 0.0         # calm regime → VAR only
         elif rs < 1.2:
-            regime_weight = 2*(rs - 0.8) / (1.2 - 0.8)  # linear ramp 
+            regime_weight = 3*(rs - 0.8) / (1.2 - 0.8)  # linear ramp 
         else:
-            regime_weight = 2.0         # regime change
+            regime_weight = 3.0         # regime change
         
         #regime_weight = 1.0 
         # --- forecasting ---
@@ -191,7 +191,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
             else:
                 time_decay = 1.0
 
-            gamma=2
+            gamma=1
 
             r = alpha_j * regime_weight * time_decay * r_raw * gamma
 
