@@ -164,10 +164,10 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         # --- adaptive α (in-sample calibration) ---
         y_hat_train = model_ml.predict(X)
 
-        num = np.dot(yj, y_hat_train)
-        den = np.dot(y_hat_train, y_hat_train) + 1e-8
-        alpha_j = num / den
-        alpha_j = float(np.clip(alpha_j, min_alpha, max_alpha))
+        #num = np.dot(yj, y_hat_train)
+        #den = np.dot(y_hat_train, y_hat_train) + 1e-8
+        #alpha_j = num / den
+        #alpha_j = float(np.clip(alpha_j, min_alpha, max_alpha))
 
         # --- regime-gated weight ---
         rs = regime_strength[j]
@@ -177,7 +177,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         #elif rs < 1.2:
         #    regime_weight = 4*(rs - 0.8) / (1.2 - 0.8)  # linear ramp 
         else:
-            regime_weight = 4.0         # regime change
+            regime_weight = 3.0         # regime change
         
         # --- forecasting ---
         win = df.values[-lags_ML:].copy()
