@@ -172,10 +172,10 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         # --- regime-gated weight ---
         rs = regime_strength[j]
 
-        if rs < 0.8:
+        if rs < 1.2:
             regime_weight = 0.0         # calm regime → VAR only
-        elif rs < 1.2:
-            regime_weight = 4*(rs - 0.8) / (1.2 - 0.8)  # linear ramp 
+        #elif rs < 1.2:
+        #    regime_weight = 4*(rs - 0.8) / (1.2 - 0.8)  # linear ramp 
         else:
             regime_weight = 4.0         # regime change
         
