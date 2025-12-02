@@ -151,7 +151,7 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
 
         # --- ML model ---
         model_ml = LGBMRegressor(
-            n_estimators=1500,
+            n_estimators=1000,
             num_leaves=16,
             learning_rate=0.01,
             subsample=0.8,
@@ -179,7 +179,6 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
         else:
             regime_weight = 4.0         # regime change
         
-        #regime_weight = 1.0 
         # --- forecasting ---
         win = df.values[-lags_ML:].copy()
 
@@ -204,7 +203,9 @@ def hybrid_var_ml_forecast(df, n_months, var_lags, lags_ML, tau, vol_window, min
     lower = lower_var + ml_resid_forecast
     upper = upper_var + ml_resid_forecast
 
-    return forecast, lower, upper
+    in_change = df.columns[regime_strength > 0.8].tolist()
+
+    return forecast, lower, upper, in_change
 
 # --- Tilpass VAR-modell for hovedlags ---
 model = VAR(df)
@@ -212,7 +213,7 @@ model = VAR(df)
 # --- Prediksjon ---
 if  ml_opt:
     with st.spinner("Reknar ML-optimert prognose, dette tar litt tid. Maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. "):
-        forecast, forecast_lower, forecast_upper = hybrid_var_ml_forecast(
+        forecast, forecast_lower, forecast_upper, in_change = hybrid_var_ml_forecast(
             df=df,
             n_months=n_months,
             var_lags=4,
@@ -333,8 +334,11 @@ ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
         fontsize=10, ha="center", va="bottom",  color='gray',
         bbox=dict(facecolor="white"))
 
+
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
+
+print("Partier med sterk endring der ML-optimering er aktiv": {in_change})
 
 # --- Validering (same as before) ---
 sjekk_dato = pd.Timestamp("2025-08-01")
