@@ -338,7 +338,10 @@ ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
 
-in_change_txt= "Partier med sterk endring der ML-optimering er aktiv: " + {in_change} 
+in_change_txt = (
+    "Partier med sterk endring der ML-optimering er aktiv: "
+    + ", ".join(in_change)
+)
 st.markdown(in_change_txt)
 
 # --- Validering (same as before) ---
