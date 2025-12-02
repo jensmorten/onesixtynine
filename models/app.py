@@ -435,14 +435,61 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
     
     st.markdown(tekst)
 
-if months_back_start == 0:
-    text = f"Dersom det var Stortingsval i enden av den predikerte perioden:{forecast_df_eom.index[-1]} \n\n"
 
-    for parti in forecast_df_eom.columns:
-        parti_res = forecast_df_eom[parti].iloc[-1]
-        text += f"- **{parti}**: {parti_res:.1f} %\n"
-        
+if months_back_start == 0:
+    raudgron = ['Raudt', 'SV', 'Ap', 'Sp', 'MDG']
+    bla = ['Høgre', 'Frp', 'KrF', 'Venstre']
+
+    # --- last predicted values ---
+    last_vals = forecast_df_eom.iloc[-1]
+
+    # --- print parties ---
+    text = "### Dersom det var Stortingsval i enden av den predikerte perioden:\n\n"
+    for parti, value in last_vals.items():
+        text += f"- **{parti}**: {value:.1f} %\n"
+
+    # --- block sums ---
+    raudgron_sum = last_vals[last_vals.index.isin(raudgron)].sum()
+    bla_sum = last_vals[last_vals.index.isin(bla)].sum()
+
+    # --- which block is largest ---
+    if raudgron_sum > bla_sum:
+        vinnar = "raudgrøn blokk"
+    elif bla_sum > raudgron_sum:
+        vinnar = "blå blokk"
+    else:
+        vinnar = "uavgjort"
+
+    text += (
+        "\n---\n"
+        "### Blokksum\n\n"
+        f"- **Raudgrøn blokk**: {raudgron_sum:.1f} %\n"
+        f"- **Blå blokk**: {bla_sum:.1f} %\n\n"
+        f"🏁 **Største blokk:** **{vinnar}**"
+    )
+
     st.markdown(text)
+
+
+# keep only parties that exist in the dataframe
+raudgron_sum = last_vals[last_vals.index.isin(raudgron)].sum()
+bla_sum = last_vals[last_vals.index.isin(bla)].sum()
+
+# determine winner
+if raudgron_sum > bla_sum:
+    vinnar = "raudgrøn blokk"
+elif bla_sum > raudgron_sum:
+    vinnar = "blå blokk"
+else:
+    vinnar = "uavgjort"
+
+# print nicely
+st.markdown(
+    "### Blokksummen ved slutten av den predikerte perioden\n"
+    f"- **Raudgrøn blokk**: {raudgron_sum:.1f} %\n"
+    f"- **Blå blokk**: {bla_sum:.1f} %\n\n"
+    f"🏁 **Største blokk:** **{vinnar}**"
+)
 
 # --- Info ---
 st.sidebar.markdown("""
