@@ -338,7 +338,7 @@ ax.text(pd.Timestamp("2025-09-08"), 30, "* Valresultat 2025:",
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
 
-print("Partier med sterk endring der ML-optimering er aktiv": {in_change})
+print("Partier med sterk endring der ML-optimering er aktiv: " {in_change})
 
 # --- Validering (same as before) ---
 sjekk_dato = pd.Timestamp("2025-08-01")
