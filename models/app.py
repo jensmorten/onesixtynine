@@ -443,8 +443,10 @@ if months_back_start == 0:
     # --- last predicted values ---
     last_vals = forecast_df_eom.iloc[-1]
 
+    d = forecast_df_eom.index[-1]
+    dato_txt = f"{d.day}. {norske_mnd[d.month]} {d.year}"
     # --- print parties ---
-    text = f"Dersom det var Stortingsval i enden av den predikerte perioden: ({forecast_df_eom.index[-1].strftime('%d. %b %Y')}) \n\n"
+    text = f"Dersom det var Stortingsval i enden av den predikerte perioden: ({dato_txt}) \n\n"
     for parti, value in last_vals.items():
         text += f"- **{parti}**: {value:.1f} %\n"
 
