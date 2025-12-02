@@ -62,7 +62,7 @@ ml_opt = (prediksjonsmodus == "ML-optimert VAR (med LightGBM)")
 
 n_months = st.sidebar.number_input(
     "📅 Månader framover å predikere:",
-    min_value=1, max_value=72, value=6, step=1
+    min_value=1, max_value=48, value=6, step=1
 )
 months_back = st.sidebar.number_input(
     "📅 Månader bakover i tid å vise i plottet:",
