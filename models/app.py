@@ -436,10 +436,12 @@ if months_back_start > 0 and df.index[-1] < sjekk_dato and all(d in forecast_df.
     st.markdown(tekst)
 
 if months_back_start == 0:
-    text= "Dersom det var Stortingsval i enden av den predikerte perioden:"
-    pred_values = []
+    text = "Dersom det var Stortingsval i enden av den predikerte perioden:\n\n"
+
     for parti in forecast_df_eom.columns:
-        text=text + " \n"  + {parti}
+        parti_res = forecast_df_eom[parti].iloc[-1]
+        text += f"- **{parti}**: {parti_res:.1f} %\n"
+
     st.markdown(text)
 
 # --- Info ---
