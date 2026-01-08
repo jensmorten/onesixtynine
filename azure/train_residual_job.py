@@ -84,7 +84,6 @@ def main(args):
             target_column_name="target",
             primary_metric="normalized_root_mean_squared_error",
             allowed_training_algorithms=ALLOWED_ALGOS,
-            n_cross_validations=3,
             limits={
             "timeout_minutes": 10,
             "max_trials": 8,
