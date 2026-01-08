@@ -85,7 +85,10 @@ def main(args):
             primary_metric="normalized_root_mean_squared_error",
             allowed_training_algorithms=ALLOWED_ALGOS,
             n_cross_validations=3,
-            limits=automl.RegressionJobLimits(**AUTO_ML_LIMITS),
+            limits={
+            "timeout_minutes": 10,
+            "max_trials": 8,
+            },
         )
 
         returned_job = ml_client.jobs.create_or_update(job)
