@@ -57,6 +57,24 @@ prediksjonsmodus = st.sidebar.radio(
     index=1
 )
 
+
+
+# Avleidde kontrollvariablar (brukast vidare i koden)
+ml_opt = (prediksjonsmodus == "ML-optimert VAR (med LightGBM)")
+
+n_months = st.sidebar.number_input(
+    "📅 Månader framover å predikere:",
+    min_value=1, max_value=48, value=6, step=1
+)
+months_back = st.sidebar.number_input(
+    "📅 Månader bakover i tid å vise i plottet:",
+    min_value=6, max_value=36, value=12, step=1
+)
+months_back_start = st.sidebar.number_input(
+    "📅Månader bakover å starte prediksjon frå:",
+    min_value=0, max_value=months_back, value=0, step=1
+)
+
 st.sidebar.markdown("### 🔐 Chat med data")
 
 # Hent passord frå Streamlit secrets
@@ -78,23 +96,6 @@ elif chat_open:
     st.sidebar.success("✅ Tilgang gitt")
 else:
     st.sidebar.error("❌ Feil passord")
-
-
-# Avleidde kontrollvariablar (brukast vidare i koden)
-ml_opt = (prediksjonsmodus == "ML-optimert VAR (med LightGBM)")
-
-n_months = st.sidebar.number_input(
-    "📅 Månader framover å predikere:",
-    min_value=1, max_value=48, value=6, step=1
-)
-months_back = st.sidebar.number_input(
-    "📅 Månader bakover i tid å vise i plottet:",
-    min_value=6, max_value=36, value=12, step=1
-)
-months_back_start = st.sidebar.number_input(
-    "📅Månader bakover å starte prediksjon frå:",
-    min_value=0, max_value=months_back, value=0, step=1
-)
 
 # st.sidebar.markdown("---")
 
