@@ -544,7 +544,41 @@ def still_eige_spm(df, q):
 
     return response.output_text
 
-###her skal det være spørsmålsfelt til brukaren 
+st.markdown("STILL SPM! ")
+# -------------------------------
+# 💬 Chat med data (spørsmål/svar)
+# -------------------------------
+st.markdown("---")
+st.markdown("## 💬 Still spørsmål til meiningsmålingane")
+
+if not chat_open:
+    st.info("🔐 Denne funksjonen er låst. Skriv korrekt passord i sidepanelet for å få tilgang.")
+else:
+    user_question = st.text_area(
+        "Skriv spørsmålet ditt her:",
+        placeholder=(
+            "Til dømes:\n"
+            "- Kva parti har hatt størst langsiktig vekst sidan 2015?\n"
+            "- Kva for parti verkar mest volatile over tid?\n"
+            "- Korleis har styrkeforholdet mellom blokkene utvikla seg?"
+        ),
+        height=120
+    )
+
+    ask_button = st.button("🧠 Spør OneSixtyNine")
+
+    if ask_button:
+        if user_question.strip() == "":
+            st.warning("Skriv eit spørsmål først.")
+        else:
+            with st.spinner("Tenker…"):
+                try:
+                    answer = still_eige_spm(df, user_question)
+                    st.markdown("### 🤖 Svar")
+                    st.markdown(answer)
+                except Exception as e:
+                    st.error(f"Noko gjekk gale under spørringa: {e}")
+
 
 # --- Info ---
 st.sidebar.markdown("""
