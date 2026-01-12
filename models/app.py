@@ -57,6 +57,29 @@ prediksjonsmodus = st.sidebar.radio(
     index=1
 )
 
+st.sidebar.markdown("### 🔐 Chat med data")
+
+# Hent passord frå Streamlit secrets
+CHAT_PASSWORD = st.secrets["pwd"]
+
+# Passord-input frå brukar
+chat_pwd_input = st.sidebar.text_input(
+    "Passord",
+    type="password",
+    help="Krevst for å bruke Chat med data"
+)
+
+# Sjekk om passord er korrekt
+chat_open = chat_pwd_input == CHAT_PASSWORD
+
+if chat_pwd_input == "":
+    st.sidebar.info("🔒 Chat med data er låst")
+elif chat_open:
+    st.sidebar.success("✅ Tilgang gitt")
+else:
+    st.sidebar.error("❌ Feil passord")
+
+
 # Avleidde kontrollvariablar (brukast vidare i koden)
 ml_opt = (prediksjonsmodus == "ML-optimert VAR (med LightGBM)")
 
@@ -475,9 +498,9 @@ aitext=""
 aitext += (
         "\n---\n"
         "OpenAI ChatGPT oppsummerer trendene etter valet i 2025:\n\n"
-        "Meiningsmålingane syner relativ stabilitet med tradisjonelle mønster fram til og kort tid etter valet i 2025. %\n "
-        "- Negativ korrelasjon mellom dei største blokkpartia Ap og Høyre, og positive korrelasjonar blant venstreorienterte parti som SV, MDG og Rødt.  %\n "
-        "- Framover kan vi vente moderate endringar i partioppslutning, med styrking av miljø- og venstreparti på kort sikt.  %\n "
+        "Meiningsmålingane syner relativ stabilitet med tradisjonelle mønster fram til og kort tid etter valet i 2025. \n "
+        "- Negativ korrelasjon mellom dei største blokkpartia Ap og Høyre, og positive korrelasjonar blant venstreorienterte parti som SV, MDG og Rødt.  \n "
+        "- Framover kan vi vente moderate endringar i partioppslutning, med styrking av miljø- og venstreparti på kort sikt.  \n "
         "- Store skifte krev viktige politiske hendingar eller kriser. %\n "
 )
 st.markdown(aitext)
