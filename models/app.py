@@ -11,6 +11,7 @@ from collections import Counter
 from pandas.tseries.offsets import MonthEnd
 from sklearn.linear_model import Ridge
 from lightgbm import LGBMRegressor
+from openai import OpenAI
 
 # --- Streamlit-oppsett ---
 st.set_page_config(
@@ -56,7 +57,6 @@ prediksjonsmodus = st.sidebar.radio(
     },
     index=1
 )
-
 
 
 # Avleidde kontrollvariablar (brukast vidare i koden)
@@ -506,7 +506,45 @@ aitext += (
 )
 st.markdown(aitext)
 
+def still_eige_spm(df, q):  
+    # --- Setup ---
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+    # --- Prepare data for the model ---
+    data_description = f"""
+    Du skal analysere meiningsmålingsdata i Noreg
+
+    Kolonner (Parti):
+    {list(df.columns)}
+
+    antall rader: {len(df)}
+
+    Dato :
+    {df.index.min()} to {df.index.max()}
+    """
+
+    # --- Ask a question ---
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input=[
+            {
+                "role": "system",
+                "content": "Du er ein analytikar som helper med å tolke datasettet. Svar presist, nøkternt og på korrekt nynorsk. Ikkje finn på tal som ikkje kan utleiast frå datasamandraget."
+            },
+            {
+                "role": "user",
+                "content": data_description
+            },
+            {
+                "role": "user",
+                "content": q
+            }
+            ]
+        )
+
+    return response.output_text
+
+###her skal det være spørsmålsfelt til brukaren 
 
 # --- Info ---
 st.sidebar.markdown("""
