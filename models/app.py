@@ -511,16 +511,38 @@ def still_eige_spm(df, q):
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
     # --- Prepare data for the model ---
+    # --- Lag datasamandrag ---
+    desc = df.describe().T[["mean", "std", "min", "max"]].round(2)
+
+    # Enkel trend: lineær helning per parti
+    trends = {}
+    x = np.arange(len(df))
+    for col in df.columns:
+        y = df[col].values
+        if np.all(np.isfinite(y)):
+            slope = np.polyfit(x, y, 1)[0]
+            trends[col] = round(slope, 4)
+
+    trend_txt = "\n".join([f"{k}: {v}" for k, v in trends.items()])
+
+    last_vals = df.iloc[-1].round(2)
+
     data_description = f"""
-    Du skal analysere meiningsmålingsdata i Noreg
+    Du skal analysere meiningsmålingsdata i Noreg.
 
-    Kolonner (Parti):
-    {list(df.columns)}
+    Datasettet inneheld månadlege målingar for norske parti.
 
-    antall rader: {len(df)}
+    Tidsperiode:
+    {df.index.min().date()} – {df.index.max().date()}
 
-    Dato :
-    {df.index.min()} to {df.index.max()}
+    Statistisk samandrag per parti:
+    {desc.to_string()}
+
+    Siste observerte verdiar:
+    {last_vals.to_string()}
+
+    Lineær trend (positiv = aukande oppslutning over tid):
+    {trend_txt}
     """
 
     # --- Ask a question ---
@@ -544,12 +566,11 @@ def still_eige_spm(df, q):
 
     return response.output_text
 
-st.markdown("STILL SPM! ")
 # -------------------------------
 # 💬 Chat med data (spørsmål/svar)
 # -------------------------------
 st.markdown("---")
-st.markdown("## 💬 Still spørsmål til meiningsmålingane")
+st.markdown("## 💬 Still spørsmål til datasettet")
 
 if not chat_open:
     st.info("🔐 Denne funksjonen er låst. Skriv korrekt passord i sidepanelet for å få tilgang.")
