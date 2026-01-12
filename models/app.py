@@ -471,6 +471,16 @@ if months_back_start == 0:
     )
 
     st.markdown(text)
+aitext=""
+aitext += (
+        "\n---\n"
+        "OpenAI ChatGPT oppsummerer trendene etter valet i 2025:\n\n"
+        "Meiningsmålingane syner relativ stabilitet med tradisjonelle mønster fram til og kort tid etter valet i 2025. %\n "
+        "- Negativ korrelasjon mellom dei største blokkpartia Ap og Høyre, og positive korrelasjonar blant venstreorienterte parti som SV, MDG og Rødt.  %\n "
+        "- Framover kan vi vente moderate endringar i partioppslutning, med styrking av miljø- og venstreparti på kort sikt.  %\n "
+        "- Store skifte krev viktige politiske hendingar eller kriser. %\n "
+)
+st.markdown(aitext)
 
 
 
