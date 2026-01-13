@@ -527,6 +527,18 @@ def still_eige_spm(df, q):
 
     last_vals = df.iloc[-1].round(2)
 
+    corr = df.corr()
+
+    corr_pairs = (
+    corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
+        .stack()
+        .sort_values()
+    )
+
+    # Mest negative og mest positive
+    top_negative = corr_pairs.head(6).round(2)
+    top_positive = corr_pairs.tail(6).round(2)
+
     data_description = f"""
     Du skal analysere meiningsmålingsdata i Noreg.
 
@@ -543,6 +555,24 @@ def still_eige_spm(df, q):
 
     Lineær trend (positiv = aukande oppslutning over tid):
     {trend_txt}
+
+    Sterkaste positive samvariasjonar:
+    {top_positive.to_string()}
+
+    Sterkaste negative samvariasjonar:
+    {top_negative.to_string()}  
+
+    hele datasettet: 
+    {df}
+
+    framtidige prediksjoner:
+    {forecast_df}
+    
+    framtidige prediksjoner, nedre grense:
+    {forecast_lower_df}
+
+    framtidige prediksjoner, øvre grense:
+    {forecast_upper_df}
     """
 
     # --- Ask a question ---
