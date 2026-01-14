@@ -495,16 +495,16 @@ if months_back_start == 0:
     )
 
     st.markdown(text)
-aitext=""
-aitext += (
-        "\n---\n"
-        "OpenAI ChatGPT oppsummerer trendene etter valet i 2025:\n\n"
-        "Meiningsmålingane syner relativ stabilitet med tradisjonelle mønster fram til og kort tid etter valet i 2025. \n "
-        "- Negativ korrelasjon mellom dei største blokkpartia Ap og Høyre, og positive korrelasjonar blant venstreorienterte parti som SV, MDG og Rødt.  \n "
-        "- Framover kan vi vente moderate endringar i partioppslutning, med styrking av miljø- og venstreparti på kort sikt.  \n "
-        "- Store skifte krev viktige politiske hendingar eller kriser. %\n "
-)
-st.markdown(aitext)
+#aitext=""
+#aitext += (
+#        "\n---\n"
+#        "OpenAI ChatGPT oppsummerer trendene etter valet i 2025:\n\n"
+#        "Meiningsmålingane syner relativ stabilitet med tradisjonelle mønster fram til og kort tid etter valet i 2025. \n "
+#        "- Negativ korrelasjon mellom dei største blokkpartia Ap og Høyre, og positive korrelasjonar blant venstreorienterte parti som SV, MDG og Rødt.  \n "
+#        "- Framover kan vi vente moderate endringar i partioppslutning, med styrking av miljø- og venstreparti på kort sikt.  \n "
+#        "- Store skifte krev viktige politiske hendingar eller kriser. %\n "
+#)
+#st.markdown(aitext)
 
 def still_eige_spm(df, q):  
     # --- Setup ---
@@ -542,7 +542,7 @@ def still_eige_spm(df, q):
     data_description = f"""
     Du skal analysere meiningsmålingsdata i Noreg. 
 
-    Datasettet inneheld månadlege målingar for norske parti.
+    Datasettet inneheld gjennomsnitt av målingar for norske parti per månad. Kolonnane gir partiets namn. Tala er i prosent oppslutning. 
 
     Tidsperiode:
     {df.index.min().date()} – {df.index.max().date()}
@@ -587,7 +587,7 @@ def still_eige_spm(df, q):
 
     # --- Ask a question ---
     response = client.responses.create(
-        model="gpt-4.1-mini",
+        model="gpt-5-mini",
         input=[
             {
                 "role": "system",
@@ -626,13 +626,13 @@ else:
         height=120
     )
 
-    ask_button = st.button("🧠 Spør OneSixtyNine")
+    ask_button = st.button("🧠 Spør OneSixtyNine (med hjelp av openAI chagGPT)")
 
     if ask_button:
         if user_question.strip() == "":
             st.warning("Skriv eit spørsmål først.")
         else:
-            with st.spinner("Tenker…"):
+            with st.spinner("Tenkjer…"):
                 try:
                     answer = still_eige_spm(df, user_question)
                     st.markdown("### 🤖 Svar")
@@ -652,7 +652,7 @@ men har inga tilknyting til denne sida utover bruk av data som vert gjort offent
 <p>
 Modellen brukar vektor-autoregresjon 
 (<a href="https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.var_model.VAR.html" target="_blank">VAR</a>)
-for å tilpasse ti korrelerte tidsseriar samtidig. Du kan sjølv justere modellparametrane for å sjå effekten.  
+for å tilpasse ti korrelerte tidsseriar samtidig. Du kan sjølv justere modellparametrane for å sjå effekten. Dersom ML-optimert prognose er vald, vil maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. 
 </p>
 <p>
 Ta gjerne kontakt med <a href="mailto:jens.morten.nilsen@gmail.com">jens.morten.nilsen@gmail.com</a> for spørsmål eller kommentarar.  
