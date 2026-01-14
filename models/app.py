@@ -573,7 +573,7 @@ def still_eige_spm(df, q):
 
     *Namnet er ei hyllest til Nate Silvers FiveThirtyEight.
 
-    Om ML-optimert progrognose er vald er styrt av variabelen ml_opt (true="på" og false="av"). Variabelen er no {ml_opt.to_string()}. 
+    Om ML-optimert progrognose er vald er styrt av variabelen ml_opt (true="på" og false="av"). Variabelen er no {ml_opt}. 
 
     Dette er framtidigge prediksjonar
     {forecast_df.to_string()}
