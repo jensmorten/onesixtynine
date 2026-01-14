@@ -563,9 +563,19 @@ def still_eige_spm(df, q):
     {top_negative.to_string()}  
 
     heile datasettet: 
-    {df}
+    {df.to_string()}
 
-    framtidige prediksjoner:
+    Framtidige prediksjoner gjort med modellen OneSixtyNine: Prediksjonsmodellen OneSixtyNine* byggjer på historiske meiningsmålingar henta frå www.pollofpolls.no, men har inga tilknyting til denne sida utover bruk av data som vert gjort offentleg tilgjengeleg. Dersom ML-optimert prognose er vald, vil maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. 
+
+    Modellen brukar vektor-autoregresjon (VAR) for å tilpasse ti korrelerte tidsseriar samtidig.  Du kan sjølv justere modellparametrane for å sjå effekten.
+
+    Ta gjerne kontakt med jens.morten.nilsen@gmail.com for spørsmål eller kommentarar.
+
+    *Namnet er ei hyllest til Nate Silvers FiveThirtyEight.
+
+    Om ML-optimert progrognose er vald er styrt av variabelen ml_opt (true="på" og false="av"). Variabelen er no {ml_opt.to_string()}. 
+
+    Dette er framtidigge prediksjonar
     {forecast_df.to_string()}
     
     framtidige prediksjoner, nedre grense:
