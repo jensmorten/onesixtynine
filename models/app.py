@@ -540,7 +540,7 @@ def still_eige_spm(df, q):
     top_positive = corr_pairs.tail(6).round(2)
 
     data_description = f"""
-    Du skal analysere meiningsmålingsdata i Noreg.
+    Du skal analysere meiningsmålingsdata i Noreg. 
 
     Datasettet inneheld månadlege målingar for norske parti.
 
@@ -562,17 +562,17 @@ def still_eige_spm(df, q):
     Sterkaste negative samvariasjonar:
     {top_negative.to_string()}  
 
-    hele datasettet: 
+    heile datasettet: 
     {df}
 
     framtidige prediksjoner:
-    {forecast_df}
+    {forecast_df.to_string()}
     
     framtidige prediksjoner, nedre grense:
-    {forecast_lower_df}
+    {forecast_lower_df.to_string()}
 
     framtidige prediksjoner, øvre grense:
-    {forecast_upper_df}
+    {forecast_upper_df.to_string()}
     """
 
     # --- Ask a question ---
@@ -628,7 +628,7 @@ else:
                     st.markdown("### 🤖 Svar")
                     st.markdown(answer)
                 except Exception as e:
-                    st.error(f"Noko gjekk gale under spørringa: {e}")
+                    st.error(f"Noko gjekk galt under spørringa: {e}")
 
 
 # --- Info ---

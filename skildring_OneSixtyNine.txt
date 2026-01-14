@@ -1,0 +1,7 @@
+ℹ️ Prediksjonsmodellen OneSixtyNine* byggjer på historiske meiningsmålingar henta frå www.pollofpolls.no, men har inga tilknyting til denne sida utover bruk av data som vert gjort offentleg tilgjengeleg.
+
+Modellen brukar vektor-autoregresjon (VAR) for å tilpasse ti korrelerte tidsseriar samtidig. Du kan sjølv justere modellparametrane for å sjå effekten.
+
+Ta gjerne kontakt med jens.morten.nilsen@gmail.com for spørsmål eller kommentarar.
+
+*Namnet er ei hyllest til Nate Silvers FiveThirtyEight.
