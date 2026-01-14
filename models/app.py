@@ -539,6 +539,9 @@ def still_eige_spm(df, q):
     top_negative = corr_pairs.head(6).round(2)
     top_positive = corr_pairs.tail(6).round(2)
 
+    url = "https://raw.githubusercontent.com/jensmorten/onesixtynine/refs/heads/main/data/stortingsval_prosent.csv"
+    df_s = pd.read_csv(url, index_col="Dato", parse_dates=True)
+
     data_description = f"""
     Du skal analysere meiningsmålingsdata i Noreg. 
 
@@ -583,11 +586,15 @@ def still_eige_spm(df, q):
 
     framtidige prediksjoner, øvre grense:
     {forecast_upper_df.to_string()}
+
+    Det kan og vere interessant å vurdere faktiske valresultat:
+    {df_s.to_string()}
+
     """
 
     # --- Ask a question ---
     response = client.responses.create(
-        model="gpt-5-nano",
+        model="gpt-5-mini",
         input=[
             {
                 "role": "system",
@@ -610,7 +617,7 @@ def still_eige_spm(df, q):
 # 💬 Chat med data (spørsmål/svar)
 # -------------------------------
 st.markdown("---")
-st.markdown("## 💬 Still spørsmål til datasettet")
+st.markdown("## 💬 Still spørsmål til datasettet (med hjelp av openAI chagGPT)")
 
 if not chat_open:
     st.info("🔐 Denne funksjonen er låst. Skriv korrekt passord i sidepanelet for å få tilgang.")
@@ -626,7 +633,7 @@ else:
         height=120
     )
 
-    ask_button = st.button("🧠 Spør OneSixtyNine (med hjelp av openAI chagGPT)")
+    ask_button = st.button("🧠 Spør OneSixtyNine")
 
     if ask_button:
         if user_question.strip() == "":
