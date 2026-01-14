@@ -587,7 +587,7 @@ def still_eige_spm(df, q):
 
     # --- Ask a question ---
     response = client.responses.create(
-        model="gpt-5-mini",
+        model="gpt-5-nano",
         input=[
             {
                 "role": "system",
