@@ -662,6 +662,8 @@ Modellen brukar vektor-autoregresjon
 for å tilpasse ti korrelerte tidsseriar samtidig. Du kan sjølv justere modellparametrane for å sjå effekten. Dersom ML-optimert prognose er vald, vil maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. 
 </p>
 <p>
+Analyser og kommentarar er tilgjengelege på substack, der du kan abonere på oppdateringar: <a href="https://substack.com/@onesixtynine">OneSixtyNine på stubstack!</a>
+<p>
 Ta gjerne kontakt med <a href="mailto:jens.morten.nilsen@gmail.com">jens.morten.nilsen@gmail.com</a> for spørsmål eller kommentarar.  
 </p>
 <p>
