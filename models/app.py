@@ -617,7 +617,7 @@ def still_eige_spm(df, q):
 # 💬 Chat med data (spørsmål/svar)
 # -------------------------------
 st.markdown("---")
-st.markdown("## 💬 Still spørsmål til datasettet (med hjelp av openAI chagGPT)")
+st.markdown("## 💬 Still spørsmål til datasettet (med hjelp av openAI chatGPT)")
 
 if not chat_open:
     st.info("🔐 Denne funksjonen er låst. Skriv korrekt passord i sidepanelet for å få tilgang.")
@@ -659,7 +659,7 @@ men har inga tilknyting til denne sida utover bruk av data som vert gjort offent
 <p>
 Modellen brukar vektor-autoregresjon 
 (<a href="https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.var_model.VAR.html" target="_blank">VAR</a>)
-for å tilpasse ti korrelerte tidsseriar samtidig. Du kan sjølv justere modellparametrane for å sjå effekten. Dersom ML-optimert prognose er vald, vil maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. 
+for å tilpasse ti korrelerte tidsseriar samtidig. Du kan sjølv justere modellparametrane for å sjå effekten. Dersom ML-optimert prognose er vald, vil maskinlæringsmodellen  <a href="https://lightgbm.readthedocs.io/en/stable/">LightGBM </a> blir tilpassa til VAR-modellens residualar. 
 </p>
 <p>
 Analyser og kommentarar er tilgjengelege på substack, der du kan abonere på oppdateringar: <a href="https://substack.com/@onesixtynine">OneSixtyNine på stubstack!</a>
