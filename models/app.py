@@ -506,112 +506,171 @@ if months_back_start == 0:
 #)
 #st.markdown(aitext)
 
-def still_eige_spm(df, q):  
-    # --- Setup ---
+def still_eige_spm(df, q):
+
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-    # --- Prepare data for the model ---
-    # --- Lag datasamandrag ---
-    desc = df.describe().T[["mean", "std", "min", "max"]].round(2)
+    # -----------------------------
+    # Analysefunksjonar (tools)
+    # -----------------------------
 
-    # Enkel trend: lineær helning per parti
-    trends = {}
-    x = np.arange(len(df))
-    for col in df.columns:
-        y = df[col].values
-        if np.all(np.isfinite(y)):
-            slope = np.polyfit(x, y, 1)[0]
-            trends[col] = round(slope, 4)
+    def get_last_values():
+        return df.iloc[-1].round(2).to_dict()
 
-    trend_txt = "\n".join([f"{k}: {v}" for k, v in trends.items()])
+    def get_trend(party):
+        x = np.arange(len(df))
+        y = df[party].values
+        slope = float(np.polyfit(x, y, 1)[0])
+        return {"party": party, "slope": round(slope, 4)}
 
-    last_vals = df.iloc[-1].round(2)
+    def get_correlation(party1, party2):
+        corr = float(df[party1].corr(df[party2]))
+        return {"party1": party1, "party2": party2, "correlation": round(corr, 3)}
 
-    corr = df.corr()
+    def get_volatility(party):
+        vol = float(df[party].std())
+        return {"party": party, "volatility": round(vol, 3)}
 
-    corr_pairs = (
-    corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
-        .stack()
-        .sort_values()
-    )
+    def block_balance():
 
-    # Mest negative og mest positive
-    top_negative = corr_pairs.head(6).round(2)
-    top_positive = corr_pairs.tail(6).round(2)
+        raudgron = ['Raudt','SV','Ap','Sp','MDG']
+        bla = ['Høgre','Frp','KrF','Venstre']
 
-    url = "https://raw.githubusercontent.com/jensmorten/onesixtynine/refs/heads/main/data/stortingsval_prosent.csv"
-    df_s = pd.read_csv(url, index_col="Dato", parse_dates=True)
+        last = df.iloc[-1]
 
-    data_description = f"""
-    Du skal analysere meiningsmålingsdata i Noreg. 
+        r = float(last[raudgron].sum())
+        b = float(last[bla].sum())
 
-    Datasettet inneheld gjennomsnitt av målingar for norske parti per månad. Kolonnane gir partiets namn. Tala er i prosent oppslutning. 
+        if r > b:
+            winner = "raudgrøn"
+        elif b > r:
+            winner = "blå"
+        else:
+            winner = "uavgjort"
 
-    Tidsperiode:
-    {df.index.min().date()} – {df.index.max().date()}
+        return {
+            "raudgron": round(r,1),
+            "bla": round(b,1),
+            "winner": winner
+        }
 
-    Statistisk samandrag per parti:
-    {desc.to_string()}
+    tools = [
+        {
+            "type": "function",
+            "name": "get_last_values",
+            "description": "Return the most recent poll values for all parties",
+            "parameters": {"type": "object","properties":{}}
+        },
+        {
+            "type": "function",
+            "name": "get_trend",
+            "description": "Return long term trend slope for a party",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "party": {"type": "string"}
+                },
+                "required": ["party"]
+            }
+        },
+        {
+            "type": "function",
+            "name": "get_correlation",
+            "description": "Return correlation between two parties",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "party1": {"type": "string"},
+                    "party2": {"type": "string"}
+                },
+                "required": ["party1","party2"]
+            }
+        },
+        {
+            "type": "function",
+            "name": "get_volatility",
+            "description": "Return volatility (std deviation) for a party",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "party": {"type": "string"}
+                },
+                "required": ["party"]
+            }
+        },
+        {
+            "type": "function",
+            "name": "block_balance",
+            "description": "Return current poll balance between red-green and blue blocs",
+            "parameters": {"type": "object","properties":{}}
+        }
+    ]
 
-    Siste observerte verdiar:
-    {last_vals.to_string()}
+    tool_map = {
+        "get_last_values": get_last_values,
+        "get_trend": get_trend,
+        "get_correlation": get_correlation,
+        "get_volatility": get_volatility,
+        "block_balance": block_balance
+    }
 
-    Lineær trend (positiv = aukande oppslutning over tid):
-    {trend_txt}
+    # -----------------------------
+    # Første kall til modellen
+    # -----------------------------
 
-    Sterkaste positive samvariasjonar:
-    {top_positive.to_string()}
-
-    Sterkaste negative samvariasjonar:
-    {top_negative.to_string()}  
-
-    heile datasettet: 
-    {df.to_string()}
-
-    Framtidige prediksjoner gjort med modellen OneSixtyNine: Prediksjonsmodellen OneSixtyNine* byggjer på historiske meiningsmålingar henta frå www.pollofpolls.no, men har inga tilknyting til denne sida utover bruk av data som vert gjort offentleg tilgjengeleg. Dersom ML-optimert prognose er vald, vil maskinlæringsmodellen LightGBM  blir tilpassa til VAR-modellens residualar. 
-
-    Modellen brukar vektor-autoregresjon (VAR) for å tilpasse ti korrelerte tidsseriar samtidig.  Du kan sjølv justere modellparametrane for å sjå effekten.
-
-    Ta gjerne kontakt med jens.morten.nilsen@gmail.com for spørsmål eller kommentarar.
-
-    *Namnet er ei hyllest til Nate Silvers FiveThirtyEight.
-
-    Om ML-optimert progrognose er vald er styrt av variabelen ml_opt (true="på" og false="av"). Variabelen er no {ml_opt}. 
-
-    Dette er framtidigge prediksjonar
-    {forecast_df.to_string()}
-    
-    framtidige prediksjoner, nedre grense:
-    {forecast_lower_df.to_string()}
-
-    framtidige prediksjoner, øvre grense:
-    {forecast_upper_df.to_string()}
-
-    Det kan og vere interessant å vurdere faktiske valresultat:
-    {df_s.to_string()}
-
-    """
-
-    # --- Ask a question ---
     response = client.responses.create(
         model="gpt-5-mini",
+        tools=tools,
         input=[
             {
                 "role": "system",
-                "content": "Du er ein analytikar som helper med å tolke datasettet. Svar presist, nøkternt og på korrekt nynorsk. Ikkje finn på tal som ikkje kan utleiast frå datasamandraget."
-            },
-            {
-                "role": "user",
-                "content": data_description
+                "content":
+                "Du er ein dataanalytikar som analyserer norske meiningsmålingar. "
+                "Svar presist på nynorsk. Bruk tools når du treng tal."
             },
             {
                 "role": "user",
                 "content": q
             }
+        ]
+    )
+
+    # -----------------------------
+    # Dersom modellen vil bruke tool
+    # -----------------------------
+
+    if response.output[0].type == "tool_call":
+
+        tool_name = response.output[0].name
+        arguments = response.output[0].arguments
+
+        result = tool_map[tool_name](**arguments)
+
+        # send resultat tilbake til modellen
+
+        response2 = client.responses.create(
+            model="gpt-5-mini",
+            input=[
+                {
+                    "role": "system",
+                    "content": "Forklar resultatet kort og presist på nynorsk."
+                },
+                {
+                    "role": "user",
+                    "content": q
+                },
+                {
+                    "role": "tool",
+                    "name": tool_name,
+                    "content": str(result)
+                }
             ]
         )
 
-    return response.output_text
+        return response2.output_text
+
+    else:
+        return response.output_text
 
 # -------------------------------
 # 💬 Chat med data (spørsmål/svar)
