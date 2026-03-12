@@ -510,129 +510,53 @@ def still_eige_spm(df, q):
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-    # ------------------------
-    # Tools (analysefunksjonar)
-    # ------------------------
+    # --- Lag eit lett datasamandrag ---
+    desc = df.describe().round(2)
 
-    def get_last_values():
-        return df.iloc[-1].round(2).to_dict()
+    last_vals = df.iloc[-1].round(2)
 
-    def get_trend(party):
-        x = np.arange(len(df))
-        y = df[party].values
-        slope = float(np.polyfit(x, y, 1)[0])
-        return {"party": party, "slope": round(slope, 4)}
+    # enkel trend
+    trends = {}
+    x = np.arange(len(df))
 
-    def get_correlation(party1, party2):
-        corr = float(df[party1].corr(df[party2]))
-        return {"party1": party1, "party2": party2, "correlation": round(corr, 3)}
+    for col in df.columns:
+        y = df[col].values
+        slope = np.polyfit(x, y, 1)[0]
+        trends[col] = round(slope, 4)
 
-    def get_volatility(party):
-        vol = float(df[party].std())
-        return {"party": party, "volatility": round(vol, 3)}
+    trend_txt = "\n".join([f"{k}: {v}" for k, v in trends.items()])
 
-    def block_balance():
+    data_summary = f"""
+    Datasettet inneheld månadlege meiningsmålingar for norske parti.
 
-        raudgron = ['Raudt','SV','Ap','Sp','MDG']
-        bla = ['Høgre','Frp','KrF','Venstre']
+    Tidsperiode:
+    {df.index.min().date()} – {df.index.max().date()}
 
-        last = df.iloc[-1]
+    Parti:
+    {", ".join(df.columns)}
 
-        r = float(last[raudgron].sum())
-        b = float(last[bla].sum())
+    Siste måling:
+    {last_vals.to_string()}
 
-        if r > b:
-            winner = "raudgrøn"
-        elif b > r:
-            winner = "blå"
-        else:
-            winner = "uavgjort"
+    Statistisk samandrag:
+    {desc.to_string()}
 
-        return {
-            "raudgron": round(r,1),
-            "bla": round(b,1),
-            "winner": winner
-        }
-
-    tool_map = {
-        "get_last_values": get_last_values,
-        "get_trend": get_trend,
-        "get_correlation": get_correlation,
-        "get_volatility": get_volatility,
-        "block_balance": block_balance
-    }
-
-    tools = [
-        {
-            "type": "function",
-            "name": "get_last_values",
-            "description": "Return the most recent poll values for all parties",
-            "parameters": {"type": "object","properties":{}}
-        },
-        {
-            "type": "function",
-            "name": "get_trend",
-            "description": "Return long term trend slope for a party",
-            "parameters": {
-                "type": "object",
-                "properties": {"party": {"type": "string"}},
-                "required": ["party"]
-            }
-        },
-        {
-            "type": "function",
-            "name": "get_correlation",
-            "description": "Return correlation between two parties",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "party1": {"type": "string"},
-                    "party2": {"type": "string"}
-                },
-                "required": ["party1","party2"]
-            }
-        },
-        {
-            "type": "function",
-            "name": "get_volatility",
-            "description": "Return volatility for a party",
-            "parameters": {
-                "type": "object",
-                "properties": {"party": {"type": "string"}},
-                "required": ["party"]
-            }
-        },
-        {
-            "type": "function",
-            "name": "block_balance",
-            "description": "Return balance between political blocs",
-            "parameters": {"type": "object","properties":{}}
-        }
-    ]
-
-    # ------------------------
-    # Første kall til modellen
-    # ------------------------
+    Lineær trend (positiv = aukande oppslutning):
+    {trend_txt}
+    """
 
     response = client.responses.create(
         model="gpt-5-mini",
-        tools=tools,
         input=[
             {
                 "role": "system",
                 "content":
-                f"""
-                Du analyserer norske meiningsmålingar.
-
-                Datasettet inneheld parti:
-                {', '.join(df.columns)}
-
-                Tidsperiode:
-                {df.index.min().date()} – {df.index.max().date()}
-
-                Bruk tools dersom du treng tal.
-                Svar kort og presist på nynorsk.
-                """
+                "Du er ein dataanalytikar som analyserer norske meiningsmålingar. "
+                "Svar kort, presist og på nynorsk. Ikkje finn opp tal."
+            },
+            {
+                "role": "user",
+                "content": data_summary
             },
             {
                 "role": "user",
@@ -641,57 +565,7 @@ def still_eige_spm(df, q):
         ]
     )
 
-    # ------------------------
-    # Finn eventuell tool_call
-    # ------------------------
-
-    tool_call = None
-
-    for item in response.output:
-        if item.type == "tool_call":
-            tool_call = item
-            break
-
-    # ------------------------
-    # Dersom ingen tool trengst
-    # ------------------------
-
-    if tool_call is None:
-        return response.output_text
-
-    # ------------------------
-    # Køyr tool
-    # ------------------------
-
-    tool_name = tool_call.name
-    arguments = tool_call.arguments or {}
-
-    result = tool_map[tool_name](**arguments)
-
-    # ------------------------
-    # Send resultat tilbake
-    # ------------------------
-
-    response2 = client.responses.create(
-        model="gpt-5-mini",
-        input=[
-            {
-                "role": "system",
-                "content": "Forklar resultatet kort og presist på nynorsk."
-            },
-            {
-                "role": "user",
-                "content": q
-            },
-            {
-                "role": "tool",
-                "name": tool_name,
-                "content": str(result)
-            }
-        ]
-    )
-
-    return response2.output_text
+    return response.output_text
 
 # -------------------------------
 # 💬 Chat med data (spørsmål/svar)
