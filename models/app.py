@@ -510,9 +510,9 @@ def still_eige_spm(df, q):
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-    # -----------------------------
-    # Analysefunksjonar (tools)
-    # -----------------------------
+    # ------------------------
+    # Tools (analysefunksjonar)
+    # ------------------------
 
     def get_last_values():
         return df.iloc[-1].round(2).to_dict()
@@ -554,6 +554,14 @@ def still_eige_spm(df, q):
             "winner": winner
         }
 
+    tool_map = {
+        "get_last_values": get_last_values,
+        "get_trend": get_trend,
+        "get_correlation": get_correlation,
+        "get_volatility": get_volatility,
+        "block_balance": block_balance
+    }
+
     tools = [
         {
             "type": "function",
@@ -567,9 +575,7 @@ def still_eige_spm(df, q):
             "description": "Return long term trend slope for a party",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "party": {"type": "string"}
-                },
+                "properties": {"party": {"type": "string"}},
                 "required": ["party"]
             }
         },
@@ -589,34 +595,24 @@ def still_eige_spm(df, q):
         {
             "type": "function",
             "name": "get_volatility",
-            "description": "Return volatility (std deviation) for a party",
+            "description": "Return volatility for a party",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "party": {"type": "string"}
-                },
+                "properties": {"party": {"type": "string"}},
                 "required": ["party"]
             }
         },
         {
             "type": "function",
             "name": "block_balance",
-            "description": "Return current poll balance between red-green and blue blocs",
+            "description": "Return balance between political blocs",
             "parameters": {"type": "object","properties":{}}
         }
     ]
 
-    tool_map = {
-        "get_last_values": get_last_values,
-        "get_trend": get_trend,
-        "get_correlation": get_correlation,
-        "get_volatility": get_volatility,
-        "block_balance": block_balance
-    }
-
-    # -----------------------------
+    # ------------------------
     # Første kall til modellen
-    # -----------------------------
+    # ------------------------
 
     response = client.responses.create(
         model="gpt-5-mini",
@@ -625,8 +621,18 @@ def still_eige_spm(df, q):
             {
                 "role": "system",
                 "content":
-                "Du er ein dataanalytikar som analyserer norske meiningsmålingar. "
-                "Svar presist på nynorsk. Bruk tools når du treng tal."
+                f"""
+                Du analyserer norske meiningsmålingar.
+
+                Datasettet inneheld parti:
+                {', '.join(df.columns)}
+
+                Tidsperiode:
+                {df.index.min().date()} – {df.index.max().date()}
+
+                Bruk tools dersom du treng tal.
+                Svar kort og presist på nynorsk.
+                """
             },
             {
                 "role": "user",
@@ -635,42 +641,57 @@ def still_eige_spm(df, q):
         ]
     )
 
-    # -----------------------------
-    # Dersom modellen vil bruke tool
-    # -----------------------------
+    # ------------------------
+    # Finn eventuell tool_call
+    # ------------------------
 
-    if response.output[0].type == "tool_call":
+    tool_call = None
 
-        tool_name = response.output[0].name
-        arguments = response.output[0].arguments
+    for item in response.output:
+        if item.type == "tool_call":
+            tool_call = item
+            break
 
-        result = tool_map[tool_name](**arguments)
+    # ------------------------
+    # Dersom ingen tool trengst
+    # ------------------------
 
-        # send resultat tilbake til modellen
-
-        response2 = client.responses.create(
-            model="gpt-5-mini",
-            input=[
-                {
-                    "role": "system",
-                    "content": "Forklar resultatet kort og presist på nynorsk."
-                },
-                {
-                    "role": "user",
-                    "content": q
-                },
-                {
-                    "role": "tool",
-                    "name": tool_name,
-                    "content": str(result)
-                }
-            ]
-        )
-
-        return response2.output_text
-
-    else:
+    if tool_call is None:
         return response.output_text
+
+    # ------------------------
+    # Køyr tool
+    # ------------------------
+
+    tool_name = tool_call.name
+    arguments = tool_call.arguments or {}
+
+    result = tool_map[tool_name](**arguments)
+
+    # ------------------------
+    # Send resultat tilbake
+    # ------------------------
+
+    response2 = client.responses.create(
+        model="gpt-5-mini",
+        input=[
+            {
+                "role": "system",
+                "content": "Forklar resultatet kort og presist på nynorsk."
+            },
+            {
+                "role": "user",
+                "content": q
+            },
+            {
+                "role": "tool",
+                "name": tool_name,
+                "content": str(result)
+            }
+        ]
+    )
+
+    return response2.output_text
 
 # -------------------------------
 # 💬 Chat med data (spørsmål/svar)
