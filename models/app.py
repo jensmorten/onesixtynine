@@ -243,7 +243,7 @@ else:
     forecast, forecast_lower, forecast_upper = model_fitted.forecast_interval(model_fitted.endog, steps=n_months)
     in_change=None
 
-forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='M')[1:]
+forecast_index = pd.date_range(start=df.index[-1], periods=n_months+1, freq='ME')[1:]
 
 forecast_df = pd.DataFrame(forecast, index=forecast_index, columns=df.columns)
 forecast_df = forecast_df.div(forecast_df.sum(axis=1), axis=0) * 100
